@@ -1,0 +1,35 @@
+{
+  "name": "static-site-env",
+  "version": "0.0.1",
+  "description": "static pages develop environment",
+  "main": "index.js",
+  "dependencies": {
+    "glob-all": "creeperyang/node-glob-all",
+    "handlebars": "^4.0.5",
+    "koa": "^2.0.0",
+    "koa-logger": "^2.0.0",
+    "koa-static": "^3.0.0",
+    "mkdirp": "^0.5.1",
+    "yamljs": "^0.2.7"
+  },
+  "devDependencies": {},
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "start": "node server/index"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/creeperyang/static-site-dev.git"
+  },
+  "keywords": [
+    "static",
+    "develop environment",
+    "tool"
+  ],
+  "author": "creeperyang",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/creeperyang/static-site-dev/issues"
+  },
+  "homepage": "https://github.com/creeperyang/static-site-dev#readme"
+}

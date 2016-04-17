@@ -1,0 +1,29 @@
+---
+layout: simple
+data: simple
+list:
+    - one
+    - two
+    - three
+---
+
+<article style="padding: 12px 0 64px;">
+    <h3>内置helper/each的用法：</h3>
+    <pre style="color: #888;text-align: left;max-width: 100px;margin: auto;">
+        <code>
+{{{{code}}}}
+{{#each list}}
+<span>Index {{@index}} is `{{this}}`</span><br/>
+{{/each}}
+
+list is --> [one, two, three]
+{{{{/code}}}}
+        </code>
+    </pre>
+    <p>
+        <b>结果：</b>
+        {{#each list}}
+        <span>Index {{@index}} is `{{this}}`</span><br/>
+        {{/each}}
+    </p>
+</article>
