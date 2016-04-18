@@ -111,18 +111,18 @@ class Hbs {
     }
     loadData(name) {
         const url = this.fixPath(name, 'data', '.json');
-        if (!this.options.disableCache && this.cache[url]) {
-            return Promise.resolve(this.cache[url]);
+        if (!this.options.disableCache && this.cache[url] && this.cache[url].result) {
+            return Promise.resolve(this.cache[url].result);
         }
         return util.read(url)
             .then(json => {
-                this.cache[url] = JSON.parse(json);
-                return this.cache[url];
+                return (this.cache[url] = {
+                    result: JSON.parse(json)
+                });
             });
     }
     render(name, data) {
         const path = this.fixPath(name, 'view');
-        console.log(path, data);
         const cache = this.cache;
         let promises;
         return this.resolve(path, (rawTpl) => {
@@ -149,6 +149,8 @@ class Hbs {
             promises.push(metadata);
             return parsed.content;
         }).then((tplFn) => {
+            // if no promises, means we use cache[path].compiled,
+            // add cache[path].result must exists --- just use cache
             return promises ? Promise.all(promises).then((res) => {
                 util.merge(data, res[1], res[2]);
                 data.body = tplFn(data);
@@ -157,6 +159,7 @@ class Hbs {
             }) : cache[path].result;
         });
     }
+    // get compiled template (aka, function) of path (views/layouts)
     resolve(path, processTpl) {
         const cache = this.cache;
         if (!this.options.disableCache && cache[path] && cache[path].compiled) {
