@@ -5,6 +5,7 @@ const Koa = require('koa');
 const logger = require('koa-logger');
 const serve = require('koa-static');
 const hbs = require('./koa-hbs');
+const config = require('../config');
 
 const app = new Koa();
 
@@ -21,32 +22,23 @@ const isRequestHtml = (ctx) => {
     }
     return isHtml;
 };
-const tplExt = '.html';
-app.use(hbs({
-    viewPath: path.join(__dirname, '../front/src/views'),
-    partialPath: path.join(__dirname, '../front/src/views/partials'),
-    layoutPath: path.join(__dirname, '../front/src/views/layouts'),
-    helperPath: path.join(__dirname, '../front/src/views/helpers'),
-    dataPath: path.join(__dirname, '../front/src/views/data'),
-    defaultLayout: 'index',
-    extname: tplExt
-}));
+// attach ctx.render
+app.use(hbs(config.hbsOptions));
+// decide when to use koa-hbs and which template
 app.use((ctx, next) => {
     if (ctx.method.toLowerCase() !== 'get' || !isRequestHtml(ctx)) return next();
     const extname = path.extname(ctx.path);
-    if (extname && extname !== tplExt) return next();
+    if (extname && extname !== config.hbsOptions.extname) return next();
 
     const name = (extname ? ctx.path.slice(0, - extname.length) :
         path.resolve(ctx.path, 'index')).replace(/^\//, '');
-    console.log(ctx.method, name);
     return ctx.render(name).then(() => {
-        console.log('success', this.status);
         next();
     }).catch(err => {
-        console.log('err', err);
+        config.hbsOnerror(err, ctx, next);
     });
 });
 
-app.listen(3000, (err) => {
-    console.log(err || 'server run at 3000');
+app.listen(config.server.port, config.server.host, (err) => {
+    console.log(err || `server run at http://${config.server.host}:${config.server.port}`);
 });
