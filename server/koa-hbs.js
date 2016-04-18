@@ -208,13 +208,10 @@ Hbs.defaults = {
 const createRenderer = (hbs) => {
     // assume this is bind to koa instance
     return function(name, locals) {
-        const defer = Promise.defer();
         locals = locals || {};
         util.merge(locals, this.state, hbs.locals);
         return hbs.render(name, locals).then((html) => {
             this.body = html;
-        }).catch(err => {
-            console.log('err', err.stack);
         });
     };
 };
