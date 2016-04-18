@@ -61,3 +61,32 @@ front
 `partials|layouts|helpers|data`都是懒加载和安装的，这意味着你可以随时通过在相应目录添加文件来添加相应特性。
 
 比如说，`index.html`依赖`partials:whatever`（模板中有`{{>whatever}}`），那么，添加`views/partials/whatever.html`即可正常渲染`index.html`了。
+
+### 4. beyond handlebars
+
+`server`目录下是服务端代码，比较重要的一块是对`handlebars`的增强。
+
+#### 4.1 页面支持yaml头
+
+```markdown
+---
+layout: false/true/'index' # 指定模板的布局
+data: 'simple' # 指定模拟数据文件的文件名 （/views/data文件夹下）
+title: 'test' # yaml头的数据在渲染页面时是可访问的
+---
+```
+
+#### 4.2 强大的数据支持
+
+如上，yaml头中指定`data`后，会自动加载该数据文件作为渲染所需的数据。
+
+此外，yaml头中的数据在渲染阶段也是可访问的。
+
+#### 4.3 渲染时的依赖分析和加载
+
+- 启动时不会加载任何`partials|layouts|helpers`（preInstalledHelpers例外）。
+- 渲染模板时动态分析`partials|layouts|helpers|data`并去加载，安装完成后才渲染该模板。
+
+#### 4.4 更多的helper
+
+出去内置helper外，额外添加了提高效率的一些helper。
