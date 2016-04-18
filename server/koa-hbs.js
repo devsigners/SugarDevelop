@@ -125,9 +125,14 @@ class Hbs {
         return this.registerHelper(require(this.fixPath(name, 'helper', '.js')));
     }
     loadData(name) {
-        return util.read(this.fixPath(name, 'data', '.json'))
+        const url = this.fixPath(name, 'data', '.json');
+        if (!this.options.disableCache && this.cache[url]) {
+            return Promise.resolve(this.cache[url]);
+        }
+        return util.read(url)
             .then(json => {
-                return JSON.parse(json);
+                this.cache[url] = JSON.parse(json);
+                return this.cache[url];
             });
     }
     render(name, data) {
@@ -169,7 +174,7 @@ class Hbs {
     }
     resolve(path, processTpl) {
         const cache = this.cache;
-        if (cache[path] && cache[path].compiled) {
+        if (!this.options.disableCache && cache[path] && cache[path].compiled) {
             return Promise.resolve(cache[path].compiled);
         }
         return util.read(path).then(rawTpl => {
@@ -205,6 +210,9 @@ class Hbs {
 
 Hbs.defaults = {
     templateOptions: {},
+    // default disable cache, so it will always reload file
+    // and thus all change will be present
+    disableCache: true,
     extname: '.hbs',
     defaultLayout: 'default'
 };
