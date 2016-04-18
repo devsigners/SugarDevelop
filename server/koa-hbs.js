@@ -68,21 +68,6 @@ class Hbs {
     unregisterHelper(name) {
         return this.handlebars.unregisterHelper(name);
     }
-    registerPartialByPath(url) {
-        // it's ok if ext is `.*`
-        const extReg = new RegExp(this.options.ext + '$', 'i');
-        const cache = this.cache;
-        return util.list(url, ['**/*' + this.options.ext]).then((files) => {
-            return files.map((file) => {
-                let name = file.replace(extReg, '');
-                return util.read(path.resolve(url, file)).then((data) => {
-                    cache[name] = data;
-                    this.registerPartial(name, data);
-                    return data;
-                });
-            });
-        });
-    }
     registerPartial() {
         return this.handlebars.registerPartial.apply(this.handlebars, arguments);
     }
