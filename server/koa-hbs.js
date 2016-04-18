@@ -203,7 +203,7 @@ class Hbs {
             }));
         }
         return Promise.resolve(partialsPromise).then(() => {
-            return this.handlebars.compile(result.ast);
+            return this.handlebars.compile(result.ast, this.options.templateOptions);
         });
     }
 }
