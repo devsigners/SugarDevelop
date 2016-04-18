@@ -84,29 +84,13 @@ class Hbs {
         return path.resolve(this.options[type + 'Path'], name);
     }
     installPartial(name) {
-        console.log('partial', name);
         return util.read(this.fixPath(name, 'partial'))
             .then(data => {
                 this.registerPartial(name, data);
-                const result = this.parse(data);
-                let partialsPromise;
-                // load unregistered helpers -- sync
-                if (result.helpers.length) {
-                    result.helpers.forEach((v) => {
-                        this.installHelper(v.name);
-                    });
-                }
-                // load unregistered partials -- async
-                if (result.partials.length) {
-                    partialsPromise = Promise.all(result.partials.map((v) => {
-                        return this.installPartial(v.name);
-                    }));
-                }
-                return Promise.resolve(partialsPromise);
+                return this.compile(data, true);
             });
     }
     installHelper(name) {
-        console.log('helper', name);
         return this.registerHelper(require(this.fixPath(name, 'helper', '.js')));
     }
     loadData(name) {
@@ -121,6 +105,12 @@ class Hbs {
                 });
             });
     }
+    /**
+     * render template combined with data
+     * @param  {String} name name of template, always the file name
+     * @param  {Object} data data
+     * @return {Promise}     promise
+     */
     render(name, data) {
         const path = this.fixPath(name, 'view');
         const cache = this.cache;
@@ -149,8 +139,9 @@ class Hbs {
             promises.push(metadata);
             return parsed.content;
         }).then((tplFn) => {
-            // if no promises, means we use cache[path].compiled,
-            // add cache[path].result must exists --- just use cache
+            // if no promises, means tplFn is from cache[path].compiled,
+            // and cache[path].result must exists,
+            // so just use cache and no need to generate again
             return promises ? Promise.all(promises).then((res) => {
                 util.merge(data, res[1], res[2]);
                 data.body = tplFn(data);
@@ -159,7 +150,12 @@ class Hbs {
             }) : cache[path].result;
         });
     }
-    // get compiled template (aka, function) of path (views/layouts)
+    /**
+     * load content of file and compile it to render function
+     * @param  {String} path         full path of file, prefer view/layout
+     * @param  {Function} processTpl process the raw tpl and return handled content
+     * @return {Promise}             promise
+     */
     resolve(path, processTpl) {
         const cache = this.cache;
         if (!this.options.disableCache && cache[path] && cache[path].compiled) {
@@ -174,8 +170,14 @@ class Hbs {
             return res;
         });
     }
-    // compile raw template
-    compile(content) {
+    /**
+     * compile raw template to render function
+     * @param  {String} content          the content of template
+     * @param  {Boolean} onlyResolveDeps only resolve dependencies and dont compile the template,
+     *                                   inner usage only.
+     * @return {Promise}                 promise
+     */
+    compile(content, onlyResolveDeps) {
         const result = this.parse(content);
         let partialsPromise;
         // load unregistered helpers -- sync
@@ -190,7 +192,8 @@ class Hbs {
                 return this.installPartial(v.name);
             }));
         }
-        return Promise.resolve(partialsPromise).then(() => {
+        const promise = Promise.resolve(partialsPromise);
+        return onlyResolveDeps ? promise : promise.then(() => {
             return this.handlebars.compile(result.ast, this.options.templateOptions);
         });
     }
