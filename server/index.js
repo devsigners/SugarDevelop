@@ -31,7 +31,7 @@ app.use((ctx, next) => {
     if (extname && extname !== config.hbsOptions.extname) return next();
 
     const name = (extname ? ctx.path.slice(0, - extname.length) :
-        path.resolve(ctx.path, 'index')).replace(/^\//, '');
+        path.join(ctx.path, 'index')).slice(1); // first char maybe '/' or '\', just remove it
     return ctx.render(name).then(() => {
         next();
     }).catch(err => {
