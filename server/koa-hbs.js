@@ -5,6 +5,31 @@ const Handlebars = require('handlebars');
 
 const util = require('./util');
 
+const genPartialInfoComment = (name, filepath, hash) => {
+    const options = {
+        path: 'absolute', // 'absolute'|'relative'|false
+        status: 'show' // 'show'|'hide'
+    };
+    if (hash && hash.length) {
+        hash.some(v => {
+            if (v.key === '$$info') {
+                let val = util.parseString(v.value.value);
+                util.merge(options, val);
+                return true;
+            }
+        });
+    }
+    if (options.status === 'hide') {
+        return null;
+    }
+    return {
+        start: `<!-- partialBegin#${name} ${
+            options.path === 'absolute' ? filepath : ''
+        } -->\n`,
+        end: `\n<!-- partialEnd#${name} -->\n`
+    };
+};
+
 class ImportScanner extends Handlebars.Visitor {
     constructor() {
         super();
@@ -22,7 +47,8 @@ class ImportScanner extends Handlebars.Visitor {
     }
     PartialStatement(partial) {
         this.partials.push({
-            name: partial.name.original
+            name: partial.name.original,
+            hash: partial.hash && partial.hash.pairs
         });
         super.PartialStatement(partial);
     }
@@ -83,10 +109,14 @@ class Hbs {
         }
         return path.resolve(this.options[type + 'Path'], name);
     }
-    installPartial(name) {
-        return util.read(this.fixPath(name, 'partial'))
+    installPartial(name, hash) {
+        const filepath = this.fixPath(name, 'partial');
+        return util.read(filepath)
             .then(data => {
-                this.registerPartial(name, data);
+                // check params and dispaly partial info with comment
+                const comment = genPartialInfoComment(name, filepath, hash);
+                this.registerPartial(name, !comment ? data :
+                    (comment.start + data + comment.end));
                 return this.compile(data, true);
             });
     }
@@ -189,7 +219,7 @@ class Hbs {
         // load unregistered partials -- async
         if (result.partials.length) {
             partialsPromise = Promise.all(result.partials.map((v) => {
-                return this.installPartial(v.name);
+                return this.installPartial(v.name, v.hash);
             }));
         }
         const promise = Promise.resolve(partialsPromise);

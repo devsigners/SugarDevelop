@@ -115,6 +115,29 @@ const isPlainObject = (obj) => {
     return true;
 };
 
+// -name|path=full|test=1,2,3
+// {
+//     name: false,
+//     path: 'full',
+//     test: [1,2,3]
+// }
+const parseString = (str) => {
+    if (!str) return null;
+    const map = {};
+    (str + '').split('|').forEach(v => {
+        let pairs = v.split('=');
+        let res;
+        if (pairs.length === 1) {
+            res = /^(-|\+?)([\S]+)$/.exec(pairs[0]);
+            if (!res) return;
+            map[res[2]] = res[1] !== '-';
+        } else if (pairs.length === 2) {
+            map[pairs[0]] = /,/.test(pairs[1]) ? pairs[1].split(',') : pairs[1];
+        }
+    });
+    return map;
+};
+
 module.exports = {
     merge,
     isPlainObject,
@@ -123,5 +146,6 @@ module.exports = {
     read,
     exist,
     getAbsolutePath,
-    parseYaml
+    parseYaml,
+    parseString
 };
