@@ -11,7 +11,7 @@ const app = new Koa();
 
 app.use(logger());
 
-app.use(serve(path.resolve(__dirname, '../front/src'), {
+app.use(serve(config.staticRoot, {
     defer: true
 }));
 

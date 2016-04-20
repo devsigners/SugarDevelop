@@ -2,7 +2,7 @@
 
 const path = require('path');
 
-const root = process.cwd();
+const root = __dirname;
 
 module.exports = {
     hbsOptions: {
@@ -18,6 +18,7 @@ module.exports = {
     hbsOnerror: (err, ctx, next) => {
         console.log('hbs render error.', err && err.message);
     },
+    staticRoot: path.join(root, 'front/src'),
     server: {
         host: '0.0.0.0',
         port: 3000
