@@ -11,24 +11,26 @@
 
 ## 开发流程与目录说明
 
-`npm start`后即可在`3000`预览静态页面。
+`npm install && npm start`后即可在`http://0.0.0.0:3000`浏览页面。
 
-我们的开发目录在`front/src`，目录结构如下：
+开发目录在`front/src`，目录结构如下：
 
 ```bash
+front/src
+├── data                     # 模拟数据，用于模板渲染
+├── helpers                  # 扩展 handlebars helper
 ├── images                   # 图片
 ├── scripts                  # 脚本
 ├── styles                   # 样式
-└── views                    # 模板和模拟数据
-    ├── index.html           # 一级页面
-    ├── data                 # 模拟数据，用于模板渲染
-    ├── helpers              # 扩展 handlebars helper
-    ├── layouts              # 布局文件
-    └── partials             # 共用代码块
+└── views                    # 模板（包括partial/layout）
+    ├── *.html               # 页面
+    ├── layouts              # 布局
+    └── partials             # 共用模板片段
+        └── components       # 模板片段支持多级目录
 ```
 
 ## 许可
 
-MIT
+[MIT](https://opensource.org/licenses/mit-license.php)
 
 欢迎提交建议和PR。

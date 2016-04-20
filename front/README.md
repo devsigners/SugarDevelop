@@ -1,34 +1,4 @@
-目前的目录结构：
-
-```bash
-front
-├── README.md
-└── src
-    ├── images
-    │   └── ctrip.png
-    ├── scripts
-    │   └── app.js
-    ├── styles
-    │   └── app.css
-    └── views
-        ├── customlayout.html
-        ├── data
-        │   └── simple.json
-        ├── helpers
-        │   ├── code.js
-        │   └── preInstalledHelpers.js
-        ├── index.html
-        ├── layouts
-        │   ├── index.html
-        │   └── simple.html
-        ├── nolayout.html
-        └── partials
-            ├── components
-            │   ├── copyright.html
-            │   └── statement.html
-            ├── footer.html
-            └── header.html
-```
+### About
 
 `front`被设计为容纳所有前端代码，其中`src`为开发目录，应该还有一个同级`dest`目录来容纳编译后的代码（todo）。
 
@@ -49,14 +19,16 @@ front
 - `localhost:3000/nolayout.html`访问的是`views/nolayout.html`；
 - `index.html|nolayout.html`这些都是一级页面，按照需要添加`views/*.html`。
 
+**注意：** 之后可能会有调整，尤其需要支持多目录/项目，页面的组织方式可能会有变化。
+
 ### 3. handlebars的相关目录
 
 本项目的模板是定制化的`handlebars`，且标准的`handlebars`特性都支持。
 
 - `partials`（增强）即对应`views/partials`文件夹下同名文件；
 - `layouts`（增强）即对应`views/layouts`文件夹下同名文件；
-- `helpers`（增强）即对应`views/helpers`文件夹下同名文件；
-- `data`（新增）即对应`views/data`文件夹下同名文件。
+- `helpers`（增强）即对应`helpers`文件夹下同名文件；
+- `data`（新增）即对应`data`文件夹下同名文件。
 
 `partials|layouts|helpers|data`都是懒加载和安装的，这意味着你可以随时通过在相应目录添加文件来添加相应特性。
 
