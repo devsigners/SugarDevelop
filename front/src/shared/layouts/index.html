@@ -1,6 +1,6 @@
-{{> header }}
-    {{css '/styles/app.css'}}
-    {{js '/scripts/app.js'}}
+{{> shared:header }}
+    {{css '/shared/styles/app.css'}}
+    {{js '/shared/scripts/app.js'}}
 </head>
 <body>
     <!--[if lt IE 9]>
@@ -9,6 +9,6 @@
 
     {{{body}}}
 
-    {{> components/statement $$info="-path"}}
+    {{> shared:components/statement $$info="-path"}}
 
-{{> footer }}
+{{> ../partials/footer }}

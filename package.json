@@ -4,12 +4,10 @@
   "description": "static pages develop environment",
   "main": "index.js",
   "dependencies": {
-    "glob-all": "creeperyang/node-glob-all",
     "handlebars": "^4.0.5",
     "koa": "^2.0.0",
     "koa-logger": "^2.0.0",
     "koa-static": "^3.0.0",
-    "mkdirp": "^0.5.1",
     "yamljs": "^0.2.7"
   },
   "devDependencies": {},

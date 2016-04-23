@@ -1,6 +1,6 @@
 ---
-layout: simple
-data: simple
+layout: shared:simple.html
+data: shared:simple.json
 list:
     - one
     - two
@@ -8,16 +8,18 @@ list:
 ---
 
 <article style="padding: 12px 0 64px;">
-    <h3>内置helper/each的用法：</h3>
+    <h1>内置helper/each的用法：</h1>
     <pre style="color: #888;text-align: left;max-width: 408px;margin: auto;">
         <code>
-{{{{code}}}}
-{{#each list}}
-<span>Index {{@index}} is `{{this}}`</span><br/>
-{{/each}}
+{{{{shared:code}}}}
+Template is:
+    {{#each list}}
+    <span>Index {{@index}} is `{{this}}`</span><br/>
+    {{/each}}
 
-list is --> [one, two, three]
-{{{{/code}}}}
+Data is:
+    list: [one, two, three]
+{{{{/shared:code}}}}
         </code>
     </pre>
     <h4>结果：</h4>

@@ -6,18 +6,28 @@ const root = __dirname;
 const staticRoot = path.join(root, 'front/src');
 
 module.exports = {
-    hbsOptions: {
-        helperPath: path.join(staticRoot, 'helpers'),
-        dataPath: path.join(staticRoot, 'data'),
-        viewPath: path.join(staticRoot, 'views'),
-        partialPath: path.join(staticRoot, 'views/partials'),
-        layoutPath: path.join(staticRoot, 'views/layouts'),
+    hbs: {
+        root: staticRoot,
+        shared: './shared',
+        // dir name
+        helper: 'helpers',
+        data: 'data',
+        view: '',
+        partial: 'partials',
+        layout: 'layouts',
+        // extra
+        isProjectGroup: (topDir, path) => {
+            return ['group'].indexOf(topDir) > -1;
+        },
+        defaultPage: 'index',
         defaultLayout: 'index',
+        preInstalledHelper: 'shared:preInstalledHelpers',
         extname: '.html',
-        templateOptions: {}
-    },
-    hbsOnerror: (err, ctx, next) => {
-        console.log('hbs render error.', err && err.message);
+        templateOptions: {},
+        configFileName: '.config.yml',
+        onerror: (err, ctx, next) => {
+            console.log('hbs render error: ', err.message);
+        }
     },
     staticRoot,
     server: {

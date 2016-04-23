@@ -5,21 +5,18 @@ layout: false
 <!DOCTYPE html>
 <html>
 <head>
-    <title>纯静态页</title>
     <meta charset='utf8'>
-    <link rel="stylesheet" href="/styles/app.css">
+    <title>测试自定义helper目录</title>
+    <link rel="stylesheet" href="/shared/styles/app.css">
 </head>
 <body style="text-align: center;">
-    <h1>这个页面是纯静态页</h1>
-    <p>关闭layout即可避免页面被嵌入布局中，怎么关闭？</p>
+    <h1>helper目录定义为myhelper</h1>
     <p>
-        在页面头部加入以下代码：
+        {{lowercase "MAKE THIS ALL LOWERCASE"}}
     </p>
     <pre style="color: #888;text-align: left;max-width: 100px;margin: auto;">
         <code>
----
-layout: false
----
+
         </code>
     </pre>
 </body>
