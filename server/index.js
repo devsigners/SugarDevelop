@@ -30,9 +30,7 @@ app.use((ctx, next) => {
     const extname = path.extname(ctx.path);
     if (extname && extname !== config.hbs.extname) return next();
 
-    const name = (extname ? ctx.path.slice(0, - extname.length) :
-        path.join(ctx.path, 'index')).slice(1); // first char maybe '/' or '\', just remove it
-    return ctx.render(name).then(() => {
+    return ctx.render(ctx.path).then(() => {
         return next();
     }).catch(err => {
         config.hbs.onerror(err, ctx, next);

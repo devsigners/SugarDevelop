@@ -56,18 +56,18 @@ class Hbs {
     unregisterPartial(name) {
         return this.handlebars.unregisterPartial(name);
     }
-    parseUrl(url) {
-        let parts = url.split(path.sep);
-        let projectName; // group/projectName
-        if (this.options.isProjectGroup(parts[0], url)) {
-            projectName = parts.slice(0, 2).join(path.sep);
-        }
-        return {
-            isGroup: !!projectName,
-            projectName: projectName || parts[0],
-            viewName: parts.slice(projectName ? 2 : 1).join(path.sep)
-        };
-    }
+    // parseUrl(url) {
+    //     let parts = url.split(path.sep);
+    //     let projectName; // group/projectName
+    //     if (this.options.isProjectGroup(parts[0], url)) {
+    //         projectName = parts.slice(0, 2).join(path.sep);
+    //     }
+    //     return {
+    //         isGroup: !!projectName,
+    //         projectName: projectName || parts[0],
+    //         viewName: parts.slice(projectName ? 2 : 1).join(path.sep)
+    //     };
+    // }
     resolvePath(name, type, ext, baseUrl) {
         // add extname
         name = path.extname(name) ? name : (name + (ext || this.getOption('extname')));
@@ -143,25 +143,25 @@ class Hbs {
                 return this.cache[url].result;
             });
     }
-    loadConfig() {
-        const url = this.resolvePath(this.options.configFileName);
-        const cache = this.cache;
-        if (!this.options.disableCache && cache[url]) {
-            return Promise.resolve(cache[url].result || cache[url]);
-        }
-        return util.read(url)
-            .then(yml => {
-                cache[url] = {
-                    result: util.parseYaml(yml)
-                };
-                return cache[url].result;
-            }).catch(err => {
-                cache[url] = {
-                    error: err.message
-                };
-                return cache[url];
-            });
-    }
+    // loadConfig() {
+    //     const url = this.resolvePath(this.options.configFileName);
+    //     const cache = this.cache;
+    //     if (!this.options.disableCache && cache[url]) {
+    //         return Promise.resolve(cache[url].result || cache[url]);
+    //     }
+    //     return util.read(url)
+    //         .then(yml => {
+    //             cache[url] = {
+    //                 result: util.parseYaml(yml)
+    //             };
+    //             return cache[url].result;
+    //         }).catch(err => {
+    //             cache[url] = {
+    //                 error: err.message
+    //             };
+    //             return cache[url];
+    //         });
+    // }
     getOption(prop) {
         return (this.currentState && this.currentState.config[prop]) || this.options[prop];
     }
@@ -171,49 +171,44 @@ class Hbs {
      * @param  {Object} data template data
      * @return {Promise}     promise
      */
-    render(name, data) {
+    render(url, data, state) {
         const cache = this.cache;
-        this.currentState = this.parseUrl(name);
+        this.currentState = state;
+        this.currentState.viewUrl = url;
         let promises;
-        return this.loadConfig().then(config => {
-            this.currentState.config = config;
-        }).then(arg => {
-            const url = this.resolvePath(this.currentState.viewName, 'view');
-            this.currentState.viewUrl = url;
-            return this.resolve(url, (rawTpl) => {
-                let parsed = util.parseMixedYaml(rawTpl);
-                let metadata = parsed.metadata;
-                let layout, dataPath;
-                if (metadata) {
-                    layout = metadata.layout;
-                    dataPath = metadata.data;
-                }
-                // load layout
-                if (layout == null || layout === true) {
-                    layout = this.options.defaultLayout;
-                } else if (!layout || typeof layout !== 'string') {
-                    layout = '__default_layout__';
-                }
-                promises = [];
-                // always prevent to fixPath of '__default_layout__'
-                // and load the file '__default_layout__.extname'
-                // just load the compiled cache and prevent possible error
-                promises.push(layout === '__default_layout__' ? this.cache['__default_layout__'].compiled :
-                    this.resolve(this.resolvePath(layout, 'layout')));
-                promises.push(dataPath ? this.loadData(dataPath, url) : null);
-                promises.push(metadata);
-                return parsed.content;
-            }, url).then((tplFn) => {
-                // if no promises, means tplFn is from cache[url].compiled,
-                // and cache[url].result must exists,
-                // so just use cache and no need to generate again
-                return promises ? Promise.all(promises).then((res) => {
-                    util.merge(data, res[1], res[2]);
-                    data.body = tplFn(data);
-                    cache[url].result = res[0](data);
-                    return cache[url].result;
-                }) : cache[url].result;
-            });
+        return this.resolve(url, (rawTpl) => {
+            let parsed = util.parseMixedYaml(rawTpl);
+            let metadata = parsed.metadata;
+            let layout, dataPath;
+            if (metadata) {
+                layout = metadata.layout;
+                dataPath = metadata.data;
+            }
+            // load layout
+            if (layout == null || layout === true) {
+                layout = this.options.defaultLayout;
+            } else if (!layout || typeof layout !== 'string') {
+                layout = '__default_layout__';
+            }
+            promises = [];
+            // always prevent to fixPath of '__default_layout__'
+            // and load the file '__default_layout__.extname'
+            // just load the compiled cache and prevent possible error
+            promises.push(layout === '__default_layout__' ? this.cache['__default_layout__'].compiled :
+                this.resolve(this.resolvePath(layout, 'layout')));
+            promises.push(dataPath ? this.loadData(dataPath, url) : null);
+            promises.push(metadata);
+            return parsed.content;
+        }, url).then((tplFn) => {
+            // if no promises, means tplFn is from cache[url].compiled,
+            // and cache[url].result must exists,
+            // so just use cache and no need to generate again
+            return promises ? Promise.all(promises).then((res) => {
+                util.merge(data, res[1], res[2]);
+                data.body = tplFn(data);
+                cache[url].result = res[0](data);
+                return cache[url].result;
+            }) : cache[url].result;
         });
     }
     /**
