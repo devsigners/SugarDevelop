@@ -1,6 +1,18 @@
 'use strict';
 
 const Handlebars = require('handlebars');
+const sharedPathRe = require('./util').sharedPathRe;
+
+const processHelper = (block, ret, alwaysHelper) => {
+    if (alwaysHelper || Handlebars.AST.helpers.helperExpression(block)) {
+        let name = block.path.original;
+        ret.push({ name });
+        if (sharedPathRe.test(name)) {
+            block.path.original = block.path.original.replace(sharedPathRe, '');
+            block.path.parts[0] = block.path.parts[0].replace(sharedPathRe, '');
+        }
+    }
+};
 
 // The Scanner is used to search dependencies (partials and helpers) of template,
 // So it's possible to do lazy load
@@ -17,17 +29,17 @@ class Scanner extends Handlebars.Visitor {
     // TODO: continue to improve helper/partial capture
     //
     MustacheStatement(block) {
-        if (Handlebars.AST.helpers.helperExpression(block)) {
-            this.helpers.push({
-                name: block.path.original
-            });
-        }
+        processHelper(block, this.helpers);
         super.MustacheStatement(block);
     }
     BlockStatement(block) {
-        this.helpers.push({
-            name: block.path.original
-        });
+        // assume BlockStatement is always helper.
+        // why?
+        // {{#noop}}{{body}}{{/noop}} is surely for noop helper
+        // but Handlebars.AST.helpers.helperExpression(block) would return false
+        // TODO:
+        // umm, should dig deep into it but not now.
+        processHelper(block, this.helpers, true);
         super.BlockStatement(block);
     }
     PartialStatement(partial) {

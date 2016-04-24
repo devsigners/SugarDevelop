@@ -7,7 +7,7 @@ const setting = require('./setting');
 const Scanner = require('./scanner.js');
 const util = require('./util');
 const relativePathRe = new RegExp('^\\.{1,2}' + path.sep);
-const sharedPathRe = /^shared:/i;
+const sharedPathRe = util.sharedPathRe;
 const genPartialInfoComment = (name, filepath, hash) => {
     const options = {
         path: 'absolute', // 'absolute'|'relative'|false
@@ -147,13 +147,6 @@ class Hbs {
     installHelper(name, baseUrl) {
         try {
             const helpers = require(this.resolvePath(name, 'helper', '.js', baseUrl));
-            // support shared helpers by prefix helperName with `shared:`
-            if (sharedPathRe.test(name) && name !== this.options.preInstalledHelper) {
-                for (let prop in helpers) {
-                    helpers[name.slice(0, 7) + prop] = helpers[prop];
-                    delete helpers[prop];
-                }
-            }
             return this.registerHelper(helpers);
         } catch(e) {
             console.log(e.message);

@@ -114,5 +114,6 @@ module.exports = {
     exist,
     parseYaml,
     parseMixedYaml,
-    parseString
+    parseString,
+    sharedPathRe: /^shared:/i
 };
