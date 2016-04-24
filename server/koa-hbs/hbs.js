@@ -8,30 +8,7 @@ const Scanner = require('./scanner.js');
 const util = require('./util');
 const relativePathRe = new RegExp('^\\.{1,2}' + path.sep);
 const sharedPathRe = util.sharedPathRe;
-const genPartialInfoComment = (name, filepath, hash) => {
-    const options = {
-        path: 'absolute', // 'absolute'|'relative'|false
-        status: 'show' // 'show'|'hide'
-    };
-    if (hash && hash.length) {
-        hash.some(v => {
-            if (v.key === '$$info') {
-                let val = util.parseString(v.value.value);
-                util.merge(options, val);
-                return true;
-            }
-        });
-    }
-    if (options.status === 'hide') {
-        return null;
-    }
-    return {
-        start: `<!-- partialBegin#${name} ${
-            options.path === 'absolute' ? filepath : ''
-        } -->\n`,
-        end: `\n<!-- partialEnd#${name} -->\n`
-    };
-};
+const genPartialInfoComment = require('./partial-extend').genPartialInfoComment;
 
 class Hbs {
     constructor(opts) {
@@ -138,7 +115,8 @@ class Hbs {
                 //
                 // TODO: baseUrl is ready, support relative option
                 //
-                const comment = genPartialInfoComment(name, url, hash);
+                const comment = genPartialInfoComment(name, url, hash, baseUrl,
+                    this.currentState.viewUrl, this.options.root);
                 this.registerPartial(name, !comment ? data :
                     (comment.start + data + comment.end));
                 return this.compile(data, true, url);
@@ -166,8 +144,7 @@ class Hbs {
             });
     }
     loadConfig() {
-        const url = this.resolvePath(
-            this.options.configFileName);
+        const url = this.resolvePath(this.options.configFileName);
         const cache = this.cache;
         if (!this.options.disableCache && cache[url]) {
             return Promise.resolve(cache[url].result || cache[url]);
@@ -202,6 +179,7 @@ class Hbs {
             this.currentState.config = config;
         }).then(arg => {
             const url = this.resolvePath(this.currentState.viewName, 'view');
+            this.currentState.viewUrl = url;
             return this.resolve(url, (rawTpl) => {
                 let parsed = util.parseMixedYaml(rawTpl);
                 let metadata = parsed.metadata;
