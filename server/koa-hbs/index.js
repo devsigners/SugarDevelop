@@ -78,3 +78,5 @@ exports = module.exports = (options) => {
 
 exports.Hbs = Hbs;
 exports.createRenderer = createRenderer;
+exports.loadConfig = loadConfig;
+exports.parseUrl = parseUrl;
