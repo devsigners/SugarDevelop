@@ -37,6 +37,8 @@ const loadConfig = (projectName, options, cache) => {
         });
 };
 
+const placeholderIndex = '__view_index_file__';
+const placeholderIndexRe = /__view_index_file__$/;
 const createRenderer = (hbs) => {
     const options = hbs.options;
     // this must be bind to koa instance
@@ -46,10 +48,14 @@ const createRenderer = (hbs) => {
         const extname = path.extname(url);
         // first char maybe '/' or '\', just remove it
         let name = (extname ? url.slice(0, - extname.length) :
-            path.join(url, '__view_index_file__')).slice(1);;
+            path.join(url, placeholderIndex)).slice(1);;
         const urlInfo = parseUrl(name, options.isProjectGroup);
+        if (urlInfo.projectName === placeholderIndex) {
+            urlInfo.projectName = '';
+            urlInfo.viewName = placeholderIndex;
+        }
         return loadConfig(urlInfo.projectName, options, hbs.cache).then((config) => {
-            urlInfo.viewName = urlInfo.viewName.replace(/__view_index_file__$/,
+            urlInfo.viewName = urlInfo.viewName.replace(placeholderIndexRe,
                 config.defaultPage || options.defaultPage);
             urlInfo.config = config;
             return hbs.render(path.resolve(options.root, urlInfo.projectName,
