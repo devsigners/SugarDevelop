@@ -56,18 +56,6 @@ class Hbs {
     unregisterPartial(name) {
         return this.handlebars.unregisterPartial(name);
     }
-    // parseUrl(url) {
-    //     let parts = url.split(path.sep);
-    //     let projectName; // group/projectName
-    //     if (this.options.isProjectGroup(parts[0], url)) {
-    //         projectName = parts.slice(0, 2).join(path.sep);
-    //     }
-    //     return {
-    //         isGroup: !!projectName,
-    //         projectName: projectName || parts[0],
-    //         viewName: parts.slice(projectName ? 2 : 1).join(path.sep)
-    //     };
-    // }
     resolvePath(name, type, ext, baseUrl) {
         // add extname
         name = path.extname(name) ? name : (name + (ext || this.getOption('extname')));
@@ -112,9 +100,6 @@ class Hbs {
         return util.read(url)
             .then(data => {
                 // check params and dispaly partial info with comment
-                //
-                // TODO: baseUrl is ready, support relative option
-                //
                 const comment = genPartialInfoComment(name, url, hash, baseUrl,
                     this.currentState.viewUrl, this.options.root);
                 this.registerPartial(name, !comment ? data :
@@ -143,32 +128,15 @@ class Hbs {
                 return this.cache[url].result;
             });
     }
-    // loadConfig() {
-    //     const url = this.resolvePath(this.options.configFileName);
-    //     const cache = this.cache;
-    //     if (!this.options.disableCache && cache[url]) {
-    //         return Promise.resolve(cache[url].result || cache[url]);
-    //     }
-    //     return util.read(url)
-    //         .then(yml => {
-    //             cache[url] = {
-    //                 result: util.parseYaml(yml)
-    //             };
-    //             return cache[url].result;
-    //         }).catch(err => {
-    //             cache[url] = {
-    //                 error: err.message
-    //             };
-    //             return cache[url];
-    //         });
-    // }
     getOption(prop) {
         return (this.currentState && this.currentState.config[prop]) || this.options[prop];
     }
     /**
      * render template combined with data
-     * @param  {String} name name of template, always the file name
-     * @param  {Object} data template data
+     * @param  {String} name  name of template, always the file name
+     * @param  {Object} data  template data
+     * @param  {Object} state current state corresponding to the view url,
+     *                        including projectName, isGroup. etc.
      * @return {Promise}     promise
      */
     render(url, data, state) {
