@@ -186,7 +186,7 @@ class Hbs {
             }
             // load layout
             if (layout == null || layout === true) {
-                layout = this.options.defaultLayout;
+                layout = this.getOption('defaultLayout');
             } else if (!layout || typeof layout !== 'string') {
                 layout = '__default_layout__';
             }

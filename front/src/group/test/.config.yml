@@ -2,3 +2,4 @@ layout: layouttt
 helper: myhelper
 partial: mypartial
 defaultPage: default
+defaultLayout: default
