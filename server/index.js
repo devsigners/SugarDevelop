@@ -16,11 +16,7 @@ app.use(serve(config.staticRoot, {
 }));
 
 const isRequestHtml = (ctx) => {
-    let isHtml = ctx.is('html');
-    if (isHtml === null && /html/.test(ctx.headers.accept)) {
-        isHtml = true;
-    }
-    return isHtml;
+    return ctx.accepts('html');
 };
 // attach ctx.render
 app.use(hbs(config.hbs));
