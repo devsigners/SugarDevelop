@@ -4,6 +4,7 @@ const staticConfig = {
     disableCache: true,
     root: process.cwd(),
     shared: './shared',
+    extname: '.html',
     isProjectGroup: (topDir, path) => {
         return ['group'].indexOf(topDir) > -1;
     },
@@ -24,7 +25,6 @@ const dynamicConfig = {
     // extra
     defaultPage: 'index',
     defaultLayout: 'index',
-    extname: '.html',
     templateOptions: {}
 };
 

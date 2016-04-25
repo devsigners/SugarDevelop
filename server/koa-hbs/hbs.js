@@ -58,7 +58,7 @@ class Hbs {
     }
     resolvePath(name, type, ext, baseUrl) {
         // add extname
-        name = path.extname(name) ? name : (name + (ext || this.getOption('extname')));
+        name = path.extname(name) ? name : (name + (ext || this.options.extname));
         if (path.isAbsolute(name)) {
             return name;
         }
