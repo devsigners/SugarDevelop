@@ -25,7 +25,7 @@ const dynamicConfig = {
     defaultPage: 'index',
     defaultLayout: 'index',
     extname: '.html',
-    templateOptions: {},
+    templateOptions: {}
 };
 
 module.exports = {

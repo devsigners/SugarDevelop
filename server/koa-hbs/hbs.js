@@ -256,7 +256,7 @@ class Hbs {
         }
         const promise = Promise.resolve(partialsPromise);
         return onlyResolveDeps ? promise : promise.then(() => {
-            return this.handlebars.compile(result.ast, this.options.templateOptions);
+            return this.handlebars.compile(result.ast, this.getOption('templateOptions'));
         });
     }
 }
