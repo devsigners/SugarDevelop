@@ -27,12 +27,13 @@ class Hbs {
         // preinstall preInstalledHelpers
         options.preInstalledHelper && this.installHelper(options.preInstalledHelper);
     }
-    parse(input, options) {
+    parse(input) {
         const scanner = this.scanner;
-        let ast = this.handlebars.parse(input, options);
+        const disableCache = this.options.disableCache;
+        let ast = this.handlebars.parse(input);
         scanner.accept(ast);
         let partials = scanner.partials.filter((v) => {
-            return !this.handlebars.partials[v.name];
+            return disableCache || !this.handlebars.partials[v.name];
         });
         let helpers = scanner.helpers.filter((v) => {
             return !this.handlebars.helpers[v.name];
@@ -83,19 +84,6 @@ class Hbs {
         return result;
     }
     installPartial(name, hash, baseUrl) {
-        // const url = this.resolvePath(name, 'partial');
-        // if (!this.options.disableCache && this.handlebars.partials[url]) {
-        //     return Promise.resolve(this.cache[url].result);
-        // }
-        // return util.read(url)
-        //     .then(data => {
-        //         this.unregisterPartial(name);
-        //         // check params and dispaly partial info with comment
-        //         const comment = genPartialInfoComment(name, url, hash);
-        //         this.registerPartial(name, !comment ? data :
-        //             (comment.start + data + comment.end));
-        //         return this.compile(data, true);
-        //     });
         const url = this.resolvePath(name, 'partial', null, baseUrl);
         return util.read(url)
             .then(data => {
