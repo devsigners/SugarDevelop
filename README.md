@@ -39,6 +39,11 @@ front/src
 
 我们只需要在`front/src`下创建我们自己的项目目录，写配置文件（可选，yaml语法），然后写模板（熟悉的handlebars）即可开发静态页面。在浏览器输入`localhost:3000/[group/]project/page.html`即可访问对应的`front/src/[group/]project/page.html`文件。
 
+## build
+
+`npm run build`命令可以把`front/src`下所有模板编译为纯静态页，编译目录为`front/dest`。
+
+编译后的目录结构保持一致。需要注意，静态资源的`src`没有做任何调整，静态资源也没有copy到dest。所以可能需要配合`gulp`来写一些task使`front/dest`目录可以在浏览器直接预览。
 
 ## 许可
 

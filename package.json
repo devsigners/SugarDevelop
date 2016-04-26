@@ -1,6 +1,6 @@
 {
   "name": "static-site-env",
-  "version": "1.0.0-beta.1",
+  "version": "1.1.0-beta.1",
   "description": "static pages develop environment",
   "main": "index.js",
   "dependencies": {
