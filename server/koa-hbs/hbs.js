@@ -6,7 +6,7 @@ const Handlebars = require('handlebars');
 const setting = require('./setting');
 const Scanner = require('./scanner.js');
 const util = require('./util');
-const relativePathRe = new RegExp('^\\.{1,2}' + path.sep);
+const relativePathRe = new RegExp('^\\.{1,2}');
 const sharedPathRe = util.sharedPathRe;
 const genPartialInfoComment = require('./partial-extend').genPartialInfoComment;
 
@@ -58,12 +58,15 @@ class Hbs {
         return this.handlebars.unregisterPartial(name);
     }
     resolvePath(name, type, ext, baseUrl) {
+        const isRelative = relativePathRe.test(name);
+        // cross os compatiable
+        name = path.normalize(name);
+        baseUrl = baseUrl && path.normalize(baseUrl);
         // add extname
         name = path.extname(name) ? name : (name + (ext || this.options.extname));
         if (path.isAbsolute(name)) {
             return name;
         }
-        const isRelative = relativePathRe.test(name);
         let projectName = this.currentState ? this.currentState.projectName : '';
         let result;
         if (isRelative) {

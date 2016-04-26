@@ -6,7 +6,9 @@ const util = require('./util');
 
 
 const parseUrl = (url, isProjectGroup) => {
-    let parts = url.split(path.sep);
+    // it's tricky that the url could be 'dir/name' (default, ctx.path is always '/')
+    // or 'dir\\name' because use `path.join` on windows
+    let parts = path.normalize(url).split(path.sep);
     let projectName; // group/projectName
     if (isProjectGroup(parts[0], url)) {
         projectName = parts.slice(0, 2).join(path.sep);
@@ -46,9 +48,9 @@ const createRenderer = (hbs) => {
         locals = locals || {};
         util.merge(locals, this.state, hbs.locals);
         const extname = path.extname(url);
-        // first char maybe '/' or '\', just remove it
+        // remove first char ('/' or '\')
         let name = (extname ? url.slice(0, - extname.length) :
-            path.join(url, placeholderIndex)).slice(1);;
+            path.join(url, placeholderIndex)).slice(1);
         const urlInfo = parseUrl(name, options.isProjectGroup);
         if (urlInfo.projectName === placeholderIndex) {
             urlInfo.projectName = '';
