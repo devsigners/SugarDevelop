@@ -45,7 +45,7 @@ const write = (filename, content, createDirIfNotExists) => {
 };
 
 const hbsInstance = new Hbs(config);
-
+hbsInstance._genPartialComment = () => null;
 list(config.root, [
     '**/*' + config.extname,
     '!' + config.shared + '/**/*' + config.extname

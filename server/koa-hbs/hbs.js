@@ -86,12 +86,15 @@ class Hbs {
         }
         return result;
     }
+    _genPartialComment() {
+        return genPartialInfoComment.apply(this, arguments);
+    }
     installPartial(name, hash, baseUrl) {
         const url = this.resolvePath(name, 'partial', null, baseUrl);
         return util.read(url)
             .then(data => {
                 // check params and dispaly partial info with comment
-                const comment = genPartialInfoComment(name, url, hash, baseUrl,
+                const comment = this._genPartialComment(name, url, hash, baseUrl,
                     this.currentState.viewUrl, this.options.root);
                 this.registerPartial(name, !comment ? data :
                     (comment.start + data + comment.end));
