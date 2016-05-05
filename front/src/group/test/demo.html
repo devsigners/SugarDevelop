@@ -1,5 +1,6 @@
 ---
 layout: false
+dynamicPartial: circle
 ---
 
 <!DOCTYPE html>
@@ -19,6 +20,6 @@ layout: false
 
         </code>
     </pre>
-    {{> circle $$info='-invoke'}}
+    {{> (safeUrl dynamicPartial) $$info='-invoke'}}
 </body>
 </html>

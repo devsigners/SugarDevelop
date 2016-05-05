@@ -43,7 +43,12 @@ class Scanner extends Handlebars.Visitor {
         super.BlockStatement(block);
     }
     PartialStatement(partial) {
+        let dynamic = partial.name.type === 'SubExpression' ? {
+            name: partial.name.path.original,
+            context: partial.name.params[0].original,
+        } : null;
         this.partials.push({
+            dynamic,
             name: partial.name.original,
             hash: partial.hash && partial.hash.pairs
         });

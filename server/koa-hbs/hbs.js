@@ -89,7 +89,20 @@ class Hbs {
     _genPartialComment() {
         return genPartialInfoComment.apply(this, arguments);
     }
-    installPartial(name, hash, baseUrl) {
+    _getDynamicPartialName(dynamic, data) {
+        return this.handlebars.helpers[dynamic.name](data[dynamic.context]);
+    }
+    installPartial(name, hash, baseUrl, dynamic) {
+        if (dynamic) {
+            dynamic.baseUrl = baseUrl;
+            dynamic.hash = hash;
+            if (this.dynamicPartials) {
+                this.dynamicPartials.push(dynamic);
+            } else {
+                this.dynamicPartials = [dynamic];
+            }
+            return;
+        }
         const url = this.resolvePath(name, 'partial', null, baseUrl);
         return util.read(url)
             .then(data => {
@@ -152,21 +165,31 @@ class Hbs {
             } else if (!layout || typeof layout !== 'string') {
                 layout = '__default_layout__';
             }
-            promises = [];
+            promises = [dataPath ? this.loadData(dataPath, url) : null, metadata];
             // always prevent to fixPath of '__default_layout__'
             // and load the file '__default_layout__.extname'
             // just load the compiled cache and prevent possible error
             promises.push(layout === '__default_layout__' ? this.cache['__default_layout__'].compiled :
                 this.resolve(this.resolvePath(layout, 'layout')));
-            promises.push(dataPath ? this.loadData(dataPath, url) : null);
-            promises.push(metadata);
             return parsed.content;
         }, url).then((tplFn) => {
             // if no promises, means tplFn is from cache[url].compiled,
             // and cache[url].result must exists,
-            // so just use cache and no need to generate again
-            return promises ? Promise.all(promises).then((res) => {
-                util.merge(data, res[1], res[2]);
+            // so just use cache and no need to generate again.
+            return promises ? Promise.resolve(promises[0]).then((fileData) => {
+                // all data merged
+                util.merge(data, fileData, promises[1]);
+                promises = promises.slice(2);
+                // then check if there is any dynamic partials
+                if (this.dynamicPartials) {
+                    promises = promises.concat(this.dynamicPartials.map((dynamic) => {
+                        return this.installPartial(this._getDynamicPartialName(dynamic, data),
+                            dynamic.hash, dynamic.baseUrl);
+                    }));
+                }
+                return Promise.all(promises);
+            }).then((res) => {
+                this.dynamicPartials = null;
                 data.body = tplFn(data);
                 cache[url].result = res[0](data);
                 return cache[url].result;
@@ -213,7 +236,7 @@ class Hbs {
         // load unregistered partials -- async
         if (result.partials.length) {
             partialsPromise = Promise.all(result.partials.map((v) => {
-                return this.installPartial(v.name, v.hash, curUrl);
+                return this.installPartial(v.name, v.hash, curUrl, v.dynamic);
             }));
         }
         const promise = Promise.resolve(partialsPromise);

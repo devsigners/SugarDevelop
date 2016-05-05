@@ -9,6 +9,7 @@
 ///
 
 const Handlebars = require('handlebars');
+const path = require('path');
 
 const helpers = {
     css(context) {
@@ -26,6 +27,14 @@ const helpers = {
         return new Handlebars.SafeString(context.map((item) => {
             return `<script src="${item}"></script>`;
         }).join('\n'));
+    },
+    safeUrl(context) {
+        return '' + context;
+    },
+    relative(context, options) {
+        let url = path.normalize(context);
+        if (/^\./.test(url)) return url;
+        return '.' + path.sep + url;
     }
 };
 
