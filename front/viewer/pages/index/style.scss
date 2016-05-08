@@ -1,0 +1,56 @@
+.container {
+    flex: 1
+}
+
+.header {
+    position: relative;
+    z-index: 9;
+    display: flex;
+    flex-direction: row;
+    background-color: #222;
+    box-shadow: 1px 1px rgba(0, 0, 0, 0.5);
+}
+.nav {
+    flex: 2;
+    &:last-child .menuContainer {
+        justify-content:flex-end;
+    }
+}
+.menuContainer {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    justify-content:flex-start;
+    list-style: none;
+    color: gray;
+}
+
+.menuItem {
+    display: block;
+    cursor: pointer;
+    width: 50px;
+    height: 36px;
+    line-height: 36px;
+    text-align: center;
+    &:hover {
+        color: white;
+        background-color: rgba(255, 255, 255, 0.05);
+    }
+    &>span {
+        display: block;
+        height: 100%;
+        width: 100%;
+    }
+}
+
+
+.iframe {
+    display: block;
+    margin: auto;
+    border: none;
+    width: 100%;
+    height: 500px;
+}
+.animateWidth {
+    transition: width 0.3s ease;
+}
