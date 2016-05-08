@@ -1,0 +1,19 @@
+{
+    "name": "乘客",
+    "author": "who",
+    "states": {
+        "default": {
+            "__file__": "base",
+            "name": "默认",
+            "data": null
+        },
+        "en": {
+            "__file__": "en",
+            "name": "英文"
+        },
+        "error": {
+            "__file__": "error",
+            "name": "错误"
+        }
+    }
+}

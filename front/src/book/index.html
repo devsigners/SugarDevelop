@@ -1,0 +1,43 @@
+---
+layout: book
+title: 预定页
+---
+
+<div class="header-wrapper">
+    <div class="header">
+        <div class="ctriplogo"><a href="http://www.ctrip.com">携程旅行网</a></div>
+        <div class="order-progress">
+            <div class="prog-step prog-current">
+                <h4><i class="ico-step"></i>乘机信息</h4>
+            </div>
+            <div class="prog-step">
+                <h4>增值服务</h4>
+            </div>
+            <div class="prog-step">
+                <h4>支付</h4>
+            </div>
+            <div class="prog-step prog-last">
+                <h4>完成</h4>
+            </div>
+        </div>
+        <div class="loginbar">
+            <a href="#" class="ctrip-username">登录</a>
+            <a href="#" class="callcenter">客服中心</a>
+        </div>
+    </div>
+</div>
+
+<div class="container">
+    <div class="main">
+        <div class="passenger-box">
+            {{> components/passenger/index}}
+        </div>
+    </div>
+    <div class="sidebar">
+        <div class="airline-flagship">
+            <span class="flt-num">CA1858</span>
+            <span class="flt-type">773</span>
+            <span class="flt-seat">经济舱</span>
+        </div>
+    </div>
+</div>
