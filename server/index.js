@@ -15,6 +15,11 @@ app.use(serve(config.staticRoot, {
     defer: true
 }));
 
+// if no other midware responds, serve viewerRoot
+app.use(serve(config.viewerRoot, {
+    defer: true
+}));
+
 const isRequestHtml = (ctx) => {
     return ctx.accepts('html');
 };
