@@ -90,6 +90,12 @@ class Hbs {
         return genPartialInfoComment.apply(this, arguments);
     }
     _getDynamicPartialName(dynamic, data) {
+        if (dynamic.context === '__component__') {
+            console.log(dynamic.baseUrl)
+            let map = JSON.parse(util.readSync(this.resolvePath('./component.json', null, null, dynamic.baseUrl)));
+            console.log(map);
+            data['__component__'] = map.states.default.__file__;
+        }
         return this.handlebars.helpers[dynamic.name](data[dynamic.context]);
     }
     installPartial(name, hash, baseUrl, dynamic) {
@@ -101,6 +107,9 @@ class Hbs {
             } else {
                 this.dynamicPartials = [dynamic];
             }
+            //
+            // TODO: ???? read component.json here ???
+            //
             return;
         }
         const url = this.resolvePath(name, 'partial', null, baseUrl);

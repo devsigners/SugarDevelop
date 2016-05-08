@@ -18,6 +18,8 @@ const read = (filename, options) => {
     });
 };
 
+const readSync = fs.readFileSync;
+
 /**
  * exist path or not
  * @param  {String} filename path
@@ -111,6 +113,7 @@ module.exports = {
     mergeFileds,
     isPlainObject,
     read,
+    readSync,
     exist,
     parseYaml,
     parseMixedYaml,
