@@ -3,4 +3,5 @@ node_modules
 *.log
 /tmp
 front/dest
-_*
+._*
+viewer-dest
