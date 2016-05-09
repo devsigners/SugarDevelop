@@ -4,4 +4,4 @@ node_modules
 /tmp
 front/dest
 ._*
-viewer-dest
+vdest

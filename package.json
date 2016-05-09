@@ -39,7 +39,8 @@
     "test": "echo \"Error: no test specified\" && exit 1",
     "start": "node server/index",
     "build": "rm -rf front/dest && node tools/build",
-    "build:viewer": "node_modules/.bin/webpack --config tools/webpack.config.js"
+    "build:viewer": "node_modules/.bin/webpack --config tools/webpack.config.js",
+    "build:components": "node tools/genComponentsMap"
   },
   "repository": {
     "type": "git",

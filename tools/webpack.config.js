@@ -7,9 +7,9 @@ const HtmlwebpackPlugin = require('html-webpack-plugin');
 const ExtractTextPlugin = require('extract-text-webpack-plugin');
 const config = require('../config');
 
-const APP_PATH = resolve(process.cwd(), 'front/viewer');
-const BUILD_PATH = resolve(process.cwd(), 'front/viewer-dest');
-
+const APP_PATH = config.viewer.source;
+const BUILD_PATH = config.viewer.dest;
+console.log(APP_PATH, BUILD_PATH);
 const plugins = [
     new webpack.DefinePlugin({
         'process.env':{
@@ -22,14 +22,14 @@ const plugins = [
             warnings: false
         }
     }),
-    new webpack.optimize.CommonsChunkPlugin('vendors', 'scripts/vendors.js'),
+    new webpack.optimize.CommonsChunkPlugin('vendors', `scripts/vendors.js`),
     new HtmlwebpackPlugin({
         title: '模块查看器',
         filename: 'index.html',
         inject: 'body',
         template: resolve(APP_PATH, 'index.html')
     }),
-    new ExtractTextPlugin('styles/[name].[hash:5].css', {
+    new ExtractTextPlugin(`styles/[name].[hash:5].css`, {
         allChunks: true
     }),
     new webpack.optimize.OccurenceOrderPlugin(),
@@ -98,7 +98,7 @@ const webpackConfig = {
         path: BUILD_PATH,
         // workround for load image correctly in browser.
         // see <https://github.com/webpack/style-loader/issues/55> for detail
-        publicPath: `http://${config.server.host}:${config.server.port}/`,
+        publicPath: `http://${config.server.host}:${config.server.port}/${config.viewer.prefix}/`,
         filename: `scripts/[name].[hash:5].js`,
         chunkFilename: `scripts/[id].bundle.js`
     },
