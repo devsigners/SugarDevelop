@@ -7,6 +7,17 @@ const config = require('../config');
 const res = {};
 const projectDirs = {};
 
+const generateMapFile = (map) => {
+    let content = JSON.stringify(map, null, '\t');
+    return `(function(root, content) {
+    if (typeof module === 'object' && module.exports) {
+        module.exports = content;
+    } else {
+        root.__components__ = content;
+    }
+})(this, ${content})`;
+};
+
 util.list(config.staticRoot, ['**/component.json']).then((files) => {
     if (!files || !files.length) {
         console.log('found no components info, will exit');
@@ -34,10 +45,11 @@ util.list(config.staticRoot, ['**/component.json']).then((files) => {
         if (!c) return;
         let info = projectDirs[res.files[i]];
         let projectName = info.project;
+        c.configFile = res.files[i];
         if (!res[projectName]) {
             res[projectName] = {
                 project: projectName,
-                files: [res.files[i]],
+                __files__: [res.files[i]],
                 components: {
                     [info.file]: c
                 }
@@ -50,9 +62,8 @@ util.list(config.staticRoot, ['**/component.json']).then((files) => {
     delete res.files;
     let promises = [];
     for (let pro in res) {
-        let content = JSON.stringify(res[pro], null, '\t')
         promises.push(util.write(path.resolve(config.staticRoot, pro, 'components.js'),
-            `window.__components__ = ${content}`));
+            generateMapFile(res[pro])));
     }
     return Promise.all(promises);
 }).then(() => {
