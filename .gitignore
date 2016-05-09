@@ -5,3 +5,4 @@ node_modules
 front/dest
 ._*
 vdest
+front/src/**/components.js
