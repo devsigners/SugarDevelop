@@ -32,7 +32,13 @@ const hbsOptions = {
 module.exports = {
     hbs: hbsOptions,
     staticRoot,
-    viewerRoot: path.join(root, 'front/viewer-dest'),
+    // viewerRoot: path.join(root, 'front/viewer-dest'),
+    viewer: {
+        source: path.join(root, 'front/viewer'),
+        dest: path.join(root, 'front/vdest'),
+        // prefix used to set res path
+        prefix: 'viewer'
+    },
     server: {
         host: '0.0.0.0',
         port: 3000

@@ -91,9 +91,7 @@ class Hbs {
     }
     _getDynamicPartialName(dynamic, data) {
         if (dynamic.context === '__component__') {
-            console.log(dynamic.baseUrl)
             let map = JSON.parse(util.readSync(this.resolvePath('./component.json', null, null, dynamic.baseUrl)));
-            console.log(map);
             data['__component__'] = map.states.default.__file__;
         }
         return this.handlebars.helpers[dynamic.name](data[dynamic.context]);
