@@ -46,13 +46,20 @@ util.list(config.staticRoot, ['**/component.json']).then((files) => {
         if (!c) return;
         let info = projectDirs[res.files[i]];
         let projectName = info.project;
+        let needToWriteBack = false;
         c.configFile = res.files[i];
         // check c._key
         if (!c._key) {
             c._key = '_component_' + util.genUniqueKey();
-            writePromise.push(util.write(path.resolve(config.staticRoot, res.files[i]),
-                JSON.stringify(c, null, '\t')));
+            needToWriteBack = true;
         }
+        // check c._state (which state is rendered and shown, defaults to `default`)
+        if (!c._state) {
+            c._state = 'default';
+            needToWriteBack =  true;
+        }
+        needToWriteBack && writePromise.push(util.write(path.resolve(config.staticRoot, res.files[i]),
+            JSON.stringify(c, null, '\t')));
         if (!res[projectName]) {
             res[projectName] = {
                 project: projectName,
