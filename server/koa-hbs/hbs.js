@@ -105,9 +105,9 @@ class Hbs {
     _genPartialComment() {
         return genPartialInfoComment.apply(this, arguments);
     }
-    _getDynamicPartialName(dynamic, data) {
-        if (dynamic.context === '__component__') {
-            let map = JSON.parse(util.readSync(this.resolvePath('./component.json', null, null, dynamic.baseUrl)));
+    _getDynamicPartialName(dynamic, data, map) {
+        if (dynamic.context === '__component__' && !data['__component__']) {
+            map = map || JSON.parse(util.readSync(this.resolvePath('./component.json', null, null, dynamic.baseUrl)));
             data['__component__'] = map.states.default.__file__;
         }
         return this.handlebars.helpers[dynamic.name](data[dynamic.context]);
@@ -230,7 +230,7 @@ class Hbs {
         const configFile = path.resolve(this.options.root, urlInfo.configFile);
         return util.read(configFile).then(content => JSON.parse(content))
             .then(json => {
-                let name = json.type === 'd' ? json.template : urlInfo.file;
+                let name = json.type === 'd' ? json.template : json.states[urlInfo.state || 'default'].__file__;
                 // name will be resolved to error path, use relative path here
                 let relativeUrl = path.relative(fakeUrl.replace(/__fake__\.html$/, ''), path.resolve(this.options.root,
                     urlInfo.configFile).replace(/component\.json/, name));
@@ -240,6 +240,8 @@ class Hbs {
                     viewName: '__fake__',
                     viewUrl: fakeUrl
                 };
+                // specify component state, if empty, will be set to `default` lately
+                data.__component__ = urlInfo.state;
                 return this.compile(`{{> ./${relativeUrl} $$info='status=hide'}}`,
                     false, fakeUrl);
             })
