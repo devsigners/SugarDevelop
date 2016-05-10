@@ -68,12 +68,21 @@ const createRenderer = (hbs) => {
         });
     };
 };
+const createPartialRenderer = (hbs) => {
+    return function(urlInfo, locals) {
+        return hbs.renderPartial(urlInfo, locals).then((partial) => {
+            this.body = partial;
+        });
+    }
+};
 
 exports = module.exports = (options) => {
     const hbs = new Hbs(options);
     const render = createRenderer(hbs);
+    const renderPartial = createPartialRenderer(hbs);
     return (ctx, next) => {
         ctx.render = render;
+        ctx.renderPartial = renderPartial;
         return next();
     };
 };

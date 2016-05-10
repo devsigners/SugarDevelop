@@ -10,6 +10,9 @@ const relativePathRe = new RegExp('^\\.{1,2}');
 const sharedPathRe = util.sharedPathRe;
 const genPartialInfoComment = require('./partial-extend').genPartialInfoComment;
 
+// if is magic url, dont resolve it and load corresponding content from cache directly
+const rMagicUrl = /__[^_\s\W]+(_[^_\s\W]+)*__/;
+
 class Hbs {
     constructor(opts) {
         let options = this.options = util.merge({}, Hbs.defaults, opts);
@@ -57,7 +60,20 @@ class Hbs {
     unregisterPartial(name) {
         return this.handlebars.unregisterPartial(name);
     }
+    /**
+     * resolve path
+     * @param  {String} name    file name, maybe without extname, maybe with dir
+     *                          1. if absolute, only check extname (add if needed);
+     *                          2. if relative, check ext, and resolve to baseUrl or root+projectName
+     *                          3. if default name like `index|book/test`, resolve to baseUrl or root+projectName+typeDir
+     *                          4. if magic url, return it immediately.
+     * @param  {String} type    partial|layout|data
+     * @param  {String} ext     extname, if omitted, use this.options.extname
+     * @param  {String} baseUrl base url
+     * @return {String}         absolute url
+     */
     resolvePath(name, type, ext, baseUrl) {
+        if (rMagicUrl.test(name)) return name;
         const isRelative = relativePathRe.test(name);
         // cross os compatiable
         name = path.normalize(name);
@@ -143,7 +159,7 @@ class Hbs {
             });
     }
     getOption(prop) {
-        return (this.currentState && this.currentState.config[prop]) || this.options[prop];
+        return (this.currentState && this.currentState.config && this.currentState.config[prop]) || this.options[prop];
     }
     /**
      * render template combined with data
@@ -176,32 +192,64 @@ class Hbs {
             // always prevent to fixPath of '__default_layout__'
             // and load the file '__default_layout__.extname'
             // just load the compiled cache and prevent possible error
-            promises.push(layout === '__default_layout__' ? this.cache['__default_layout__'].compiled :
-                this.resolve(this.resolvePath(layout, 'layout')));
+            //promises.push(layout === '__default_layout__' ? this.cache['__default_layout__'].compiled :
+                //this.resolve(this.resolvePath(layout, 'layout')));
+            promises.push(this.resolve(this.resolvePath(layout, 'layout')));
             return parsed.content;
         }, url).then((tplFn) => {
-            // if no promises, means tplFn is from cache[url].compiled,
-            // and cache[url].result must exists,
-            // so just use cache and no need to generate again.
-            return promises ? Promise.resolve(promises[0]).then((fileData) => {
-                // all data merged
-                util.merge(data, fileData, promises[1]);
-                promises = promises.slice(2);
-                // then check if there is any dynamic partials
-                if (this.dynamicPartials) {
-                    promises = promises.concat(this.dynamicPartials.map((dynamic) => {
-                        return this.installPartial(this._getDynamicPartialName(dynamic, data),
-                            dynamic.hash, dynamic.baseUrl);
-                    }));
-                }
-                return Promise.all(promises);
-            }).then((res) => {
-                this.dynamicPartials = null;
-                data.body = tplFn(data);
-                cache[url].result = res[0](data);
-                return cache[url].result;
-            }) : cache[url].result;
+            return this._innerRender(tplFn, url, data, promises);
         });
+    }
+    _innerRender(tplFn, url, data, promises) {
+        // if no promises, means tplFn is from cache[url].compiled,
+        // and cache[url].result must exists,
+        // so just use cache and no need to generate again.
+        return promises ? Promise.resolve(promises[0]).then((fileData) => {
+            // all data merged
+            util.merge(data, fileData, promises[1]);
+            promises = promises.slice(2);
+            // then check if there is any dynamic partials
+            if (this.dynamicPartials) {
+                promises = promises.concat(this.dynamicPartials.map((dynamic) => {
+                    return this.installPartial(this._getDynamicPartialName(dynamic, data),
+                        dynamic.hash, dynamic.baseUrl);
+                }));
+            }
+            return Promise.all(promises);
+        }).then((res) => {
+            this.dynamicPartials = null;
+            data.body = tplFn(data);
+            this.cache[url].result = res[0](data);
+            return this.cache[url].result;
+        }) : this.cache[url].result;
+    }
+    renderPartial(urlInfo, data) {
+        // simulate render view
+        data = data || {};
+        const fakeUrl = path.resolve(this.options.root, urlInfo.project, '__fake__.html');
+        const configFile = path.resolve(this.options.root, urlInfo.configFile);
+        return util.read(configFile).then(content => JSON.parse(content))
+            .then(json => {
+                let name = json.type === 'd' ? json.template : urlInfo.file;
+                // name will be resolved to error path, use relative path here
+                let relativeUrl = path.relative(fakeUrl.replace(/__fake__\.html$/, ''), path.resolve(this.options.root,
+                    urlInfo.configFile).replace(/component\.json/, name));
+                // update currentState manually
+                this.currentState = {
+                    projectName: urlInfo.project,
+                    viewName: '__fake__',
+                    viewUrl: fakeUrl
+                };
+                return this.compile(`{{> ./${relativeUrl} $$info='status=hide'}}`,
+                    false, fakeUrl);
+            })
+            .then(fn => {
+                this.cache.__partial_template__ = {
+                    compiled: fn
+                };
+                return this._innerRender(fn, '__partial_template__', data,
+                    [null, null, this.cache.__default_layout__.compiled]);
+            });
     }
     /**
      * load content of file and compile it to render function
@@ -211,6 +259,11 @@ class Hbs {
      */
     resolve(url, processTpl) {
         const cache = this.cache;
+        // add special cases
+        if (rMagicUrl.test(url)) {
+            return cache[url] ? Promise.resolve(cache[url].compiled) :
+                Promise.reject(`try to resolve invalid url ${url}`);
+        }
         if (!this.options.disableCache && cache[url] && cache[url].compiled) {
             return Promise.resolve(cache[url].compiled);
         }
