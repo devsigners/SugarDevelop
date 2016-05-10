@@ -106,9 +106,11 @@ class Hbs {
         return genPartialInfoComment.apply(this, arguments);
     }
     _getDynamicPartialName(dynamic, data, map) {
-        if (dynamic.context === '__component__' && !data['__component__']) {
-            map = map || JSON.parse(util.readSync(this.resolvePath('./component.json', null, null, dynamic.baseUrl)));
-            data['__component__'] = map.states.default.__file__;
+        if (dynamic.context === '__component__') {
+            if (!map) map = JSON.parse(util.readSync(this.resolvePath('./component.json', null, null, dynamic.baseUrl)));
+            if (!data['__component__']) data['__component__'] = map.states.default.__file__;
+            // support data (the whole component.json is accessable by component)
+            if (!data.__component_data__) data.__component_data__ = map;
         }
         return this.handlebars.helpers[dynamic.name](data[dynamic.context]);
     }
@@ -200,7 +202,7 @@ class Hbs {
             return this._innerRender(tplFn, url, data, promises);
         });
     }
-    _innerRender(tplFn, url, data, promises) {
+    _innerRender(tplFn, url, data, promises, partialMap) {
         // if no promises, means tplFn is from cache[url].compiled,
         // and cache[url].result must exists,
         // so just use cache and no need to generate again.
@@ -211,7 +213,7 @@ class Hbs {
             // then check if there is any dynamic partials
             if (this.dynamicPartials) {
                 promises = promises.concat(this.dynamicPartials.map((dynamic) => {
-                    return this.installPartial(this._getDynamicPartialName(dynamic, data),
+                    return this.installPartial(this._getDynamicPartialName(dynamic, data, partialMap),
                         dynamic.hash, dynamic.baseUrl);
                 }));
             }
@@ -228,6 +230,7 @@ class Hbs {
         data = data || {};
         const fakeUrl = path.resolve(this.options.root, urlInfo.project, '__fake__.html');
         const configFile = path.resolve(this.options.root, urlInfo.configFile);
+        let componentMap;
         return util.read(configFile).then(content => JSON.parse(content))
             .then(json => {
                 let name = json.type === 'd' ? json.template : json.states[urlInfo.state || 'default'].__file__;
@@ -242,6 +245,7 @@ class Hbs {
                 };
                 // specify component state, if empty, will be set to `default` lately
                 data.__component__ = urlInfo.state;
+                componentMap = json;
                 return this.compile(`{{> ./${relativeUrl} $$info='status=hide'}}`,
                     false, fakeUrl);
             })
@@ -250,7 +254,7 @@ class Hbs {
                     compiled: fn
                 };
                 return this._innerRender(fn, '__partial_template__', data,
-                    [null, null, this.cache.__default_layout__.compiled]);
+                    [null, null, this.cache.__default_layout__.compiled], componentMap);
             });
     }
     /**

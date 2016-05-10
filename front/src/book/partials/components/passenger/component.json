@@ -3,6 +3,7 @@
     "author": "who",
     "type": "d",
     "template": "index",
+    "index": 2,
     "states": {
         "default": {
             "__file__": "base",
