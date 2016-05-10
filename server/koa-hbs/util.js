@@ -108,6 +108,8 @@ const parseString = (str) => {
     return map;
 };
 
+const genUniqueKey = () => Date.now().toString() + Math.random().toString().slice(-4);
+
 module.exports = {
     merge,
     mergeFileds,
@@ -118,5 +120,6 @@ module.exports = {
     parseYaml,
     parseMixedYaml,
     parseString,
-    sharedPathRe: /^shared:/i
+    sharedPathRe: /^shared:/i,
+    genUniqueKey
 };

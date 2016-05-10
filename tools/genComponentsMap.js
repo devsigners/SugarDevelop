@@ -41,11 +41,18 @@ util.list(config.staticRoot, ['**/component.json']).then((files) => {
     });
     return Promise.all(promises);
 }).then(components => {
+    let promises = [], writePromise = [];
     components.forEach((c, i) => {
         if (!c) return;
         let info = projectDirs[res.files[i]];
         let projectName = info.project;
         c.configFile = res.files[i];
+        // check c._key
+        if (!c._key) {
+            c._key = '_component_' + util.genUniqueKey();
+            writePromise.push(util.write(path.resolve(config.staticRoot, res.files[i]),
+                JSON.stringify(c, null, '\t')));
+        }
         if (!res[projectName]) {
             res[projectName] = {
                 project: projectName,
@@ -60,12 +67,11 @@ util.list(config.staticRoot, ['**/component.json']).then((files) => {
         }
     });
     delete res.files;
-    let promises = [];
     for (let pro in res) {
         promises.push(util.write(path.resolve(config.staticRoot, pro, 'components.js'),
             generateMapFile(res[pro])));
     }
-    return Promise.all(promises);
+    return Promise.all(promises.concat(writePromise));
 }).then(() => {
     console.log('successfully gen components map.');
 }).catch((err) => {
