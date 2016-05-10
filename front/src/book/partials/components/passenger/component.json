@@ -1,6 +1,8 @@
 {
     "name": "乘客",
     "author": "who",
+    "type": "d",
+    "template": "index",
     "states": {
         "default": {
             "__file__": "base",
