@@ -116,6 +116,7 @@ class Hbs {
     }
     installPartial(name, hash, baseUrl, dynamic) {
         if (dynamic) {
+            // means there is dynamic partial inside current partial
             dynamic.baseUrl = baseUrl;
             dynamic.hash = hash;
             if (this.dynamicPartials) {
@@ -123,9 +124,6 @@ class Hbs {
             } else {
                 this.dynamicPartials = [dynamic];
             }
-            //
-            // TODO: ???? read component.json here ???
-            //
             return;
         }
         const url = this.resolvePath(name, 'partial', null, baseUrl);
@@ -194,8 +192,6 @@ class Hbs {
             // always prevent to fixPath of '__default_layout__'
             // and load the file '__default_layout__.extname'
             // just load the compiled cache and prevent possible error
-            //promises.push(layout === '__default_layout__' ? this.cache['__default_layout__'].compiled :
-                //this.resolve(this.resolvePath(layout, 'layout')));
             promises.push(this.resolve(this.resolvePath(layout, 'layout')));
             return parsed.content;
         }, url).then((tplFn) => {
@@ -213,6 +209,7 @@ class Hbs {
             // then check if there is any dynamic partials
             if (this.dynamicPartials) {
                 promises = promises.concat(this.dynamicPartials.map((dynamic) => {
+                    // install dynamic partial dependencies
                     return this.installPartial(this._getDynamicPartialName(dynamic, data, partialMap),
                         dynamic.hash, dynamic.baseUrl);
                 }));

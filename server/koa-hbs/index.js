@@ -9,7 +9,8 @@ const parseUrl = (url, isProjectGroup) => {
     // it's tricky that the url could be 'dir/name' (default, ctx.path is always '/')
     // or 'dir\\name' because use `path.join` on windows
     let parts = path.normalize(url).split(path.sep);
-    let projectName; // group/projectName
+    // projectName is like: group/project or project
+    let projectName;
     if (isProjectGroup(parts[0], url)) {
         projectName = parts.slice(0, 2).join(path.sep);
     }
@@ -68,6 +69,7 @@ const createRenderer = (hbs) => {
         });
     };
 };
+// used to render partial
 const createPartialRenderer = (hbs) => {
     return function(urlInfo, locals) {
         return hbs.renderPartial(urlInfo, locals).then((partial) => {
