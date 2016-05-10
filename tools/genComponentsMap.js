@@ -59,10 +59,15 @@ util.list(config.staticRoot, ['**/component.json']).then((files) => {
                 __files__: [res.files[i]],
                 components: {
                     [info.file]: c
+                },
+                // convenient for browser side usage
+                keyComponentMap: {
+                    [c._key]: info.file
                 }
             };
         } else {
             res[projectName].files.push(res.files[i]);
+            res[projectName].keyComponentMap[c._key] = info.file;
             res[projectName].components[info.file] = c;
         }
     });
