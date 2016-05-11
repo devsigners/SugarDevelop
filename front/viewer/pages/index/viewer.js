@@ -133,6 +133,11 @@ const showState = (input, component, projectName) => {
             setToolboxPosToActiveStateEl(component);
         });
     }
+    let $checkboxes = $(input).parents('.inject-box-body').find('input');
+    if (!$checkboxes[0].checked &&
+        $checkboxes.slice(1).filter((i, el) => el.checked).length === component._count) {
+        $checkboxes[0].checked = true;
+    }
 };
 const hideState = (input, component, onHideAll) => {
     let stateName = $(input).data('state');
@@ -157,6 +162,8 @@ const hideState = (input, component, onHideAll) => {
             return false;
         }
     });
+    // manually set all-checked to false, and this wont trigger change event.
+    $(input).parents('.inject-box-body').find('input')[0].checked = false;
 };
 
 const setupComponentsViewer = (iframe, injectedStyle, hooks) => {
@@ -209,13 +216,16 @@ const setupComponentsViewer = (iframe, injectedStyle, hooks) => {
         }).on('click', (ev) => {
             ev.stopPropagation();
         });
+        let count = 0;
         iterate(component.states, (state, stateName) => {
             state.$toolbox = $box;
+            count++;
             if (state.$element) {
                 state.fileLoaded = true;
                 initComponentStateElement(state, component);
             }
         });
+        component._count = count;
     }
     // hide all toolbox
     $win.on('click', (ev) => {
