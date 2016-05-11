@@ -1,7 +1,6 @@
 import React, { PropTypes, Component } from 'react';
 import {
     setupComponentsViewer,
-    parseUrlQuery,
     genShareUrl,
     onComponentToggle
 } from './viewer.js';
@@ -15,12 +14,9 @@ class IndexPage extends Component {
         super(props);
         console.log('constructor', props);
         let url = '';
-        if (props && props.location) {
-            this.componentsMap = parseUrlQuery(props.location);
-            // url = props.location.query.url;
-            // if (url && !/^\/proxy/.test(url)) {
-            //     url = '/proxy?url=' + encodeURIComponent(url);
-            // }
+        // share url
+        if (props.location && /^\/s/.test(props.location.pathname)) {
+            url = decodeURIComponent(props.location.query.url);
         }
         this.state = {
             pages: [{
@@ -64,7 +60,7 @@ class IndexPage extends Component {
         this.setState({
             __components__: setupComponentsViewer(this.refs.iframe, injectedStyle, {
                 onHideAll: this._onHideAll.bind(this)
-            })
+            }, this.props.location)
         });
     }
     _onHideAll() {
@@ -90,7 +86,7 @@ class IndexPage extends Component {
         });
     }
     _share() {
-        let url = genShareUrl(this.state.iframe.src, this._componentsMap);
+        let url = genShareUrl(this.state.iframe.src, this.state.__components__.components);
         console.log(url);
         alert(url);
     }

@@ -22,18 +22,23 @@ const getComments = (el) => {
 
 /**
  * generate toolbox
- * @param  {String} key       component's key/name, such as `passenger`
- * @param  {Object} component component, has multiple states, like {configFile, states, type, template}
- * @return {Object}           object of {$boxHead, $boxBody, $box}
+ * @param  {String} key          component's key/name, such as `passenger`
+ * @param  {Object} component    component, has multiple states, like {configFile, states, type, template}
+ * @param  {Object} [statesInfo] like {state1: true, state2:true},
+ *                               if state1 is true, dont make the input checked,
+ *                               because it will be handled later
+ * @return {Object}              object of {$boxHead, $boxBody, $box}
  */
-const genToolbox = (key, component) => {
+const genToolbox = (key, component, statesInfo) => {
     if (!component) return;
+    console.log('genToolbox', statesInfo);
+    statesInfo = statesInfo || {};
     let content = `<label><input type="checkbox" data-is-all="yes" value="all" />All</label>`;
     let count = 0;
     for (let stateName in component.states) {
         let state = component.states[stateName];
         state.displayIndex = count++;
-        content += `<label><input type="checkbox" ${state.$element ?
+        content += `<label><input type="checkbox" ${(state.$element && !statesInfo[stateName]) ?
             'checked' : ''} data-state=${stateName} data-index=${state.displayIndex} value=${state.name} />${state.name}</label>`;
     }
     let name = component.name;
@@ -133,6 +138,7 @@ const showState = (input, component, projectName) => {
             setToolboxPosToActiveStateEl(component);
         });
     }
+    state._hide = false;
     let $checkboxes = $(input).parents('.inject-box-body').find('input');
     if (!$checkboxes[0].checked &&
         $checkboxes.slice(1).filter((i, el) => el.checked).length === component._count) {
@@ -150,6 +156,7 @@ const hideState = (input, component, onHideAll) => {
         return;
     }
     component.states[stateName].$element.hide();
+    component.states[stateName]._hide = true;
     // when the state el to hide is in front of the active state el;
     // hide the toolbox
     iterate(component.states, s => {
@@ -171,7 +178,7 @@ const hideState = (input, component, onHideAll) => {
     }
 };
 
-const setupComponentsViewer = (iframe, injectedStyle, hooks) => {
+const setupComponentsViewer = (iframe, injectedStyle, hooks, location) => {
     let win = iframe.contentWindow;
     let doc = iframe.contentDocument;
     let $body = $(doc.body);
@@ -179,6 +186,7 @@ const setupComponentsViewer = (iframe, injectedStyle, hooks) => {
 
     const __components__ = win.__components__;
     if (!__components__) throw new Error('cant find window.__components__');
+    let components = __components__.components;
 
     $(doc.head).append('<style>' + injectedStyle + '</style>');
     getComments(doc.body).forEach((v) => {
@@ -187,27 +195,17 @@ const setupComponentsViewer = (iframe, injectedStyle, hooks) => {
             c.states[c._state].$element = $(v.nextElementSibling);
         }
     });
-    console.log(__components__);
-    // let componentsMap = parseComponents(comments);
-    // if (this.componentsMap) {
-    //     let map = this.componentsMap;
-    //     for (let name in map) {
-    //         if (componentsMap[name]) {
-    //             componentsMap[name].forEach((c) => {
-    //                 if (map[name].indexOf(c.state) > -1) {
-    //                     c.show = true;
-    //                 }
-    //             });
-    //         }
-    //     }
-    // }
 
-    let components = __components__.components;
+    // merge components status from share url
+    let shareMap = parseUrlQuery(location);
+    console.log('.......', shareMap);
+
+    console.log(__components__);
     for (let name in components) {
         let component = components[name];
         let {
             $box, $boxHead, $boxBody
-        } = genToolbox(name, component);
+        } = genToolbox(name, component, shareMap && shareMap[name]);
         $body.append($box.hide());
         $boxHead.on('click', () => {
             $boxBody.toggle();
@@ -225,11 +223,31 @@ const setupComponentsViewer = (iframe, injectedStyle, hooks) => {
         iterate(component.states, (state, stateName) => {
             state.$toolbox = $box;
             count++;
+            state._hide = true;
             if (state.$element) {
                 state.fileLoaded = true;
                 initComponentStateElement(state, component);
+                if (shareMap) {
+                    state.$element.hide(); // first hide all states
+                } else {
+                    state._hide = false;
+                }
             }
         });
+        if (shareMap) {
+            if (!shareMap[name]) {
+                component._hideAll = true;
+            } else {
+                component._hideAll = false;
+                $box.find('input').each((i, el) => {
+                    let shouldShow = shareMap[name][$(el).data('state')];
+                    // show this state
+                    if (shouldShow) {
+                        $(el).click();
+                    }
+                });
+            }
+        }
         component._count = count;
     }
     // hide all toolbox
@@ -246,29 +264,37 @@ const setupComponentsViewer = (iframe, injectedStyle, hooks) => {
     return __components__;
 };
 
-// url is like: http://0.0.0.0:3100/s?components=passenger,panel&pannel=state1,state2,state3&passenger=language-en,normal&url=http%3A%2F%2Flocalhost%3A3000%2Fbook.html
+// url is like: /s?components=passenger,panel&pannel=state1,state2,state3&passenger=language-en,normal&url=http%3A%2F%2Flocalhost%3A3000%2Fbook.html
 const parseUrlQuery = ({pathname, query}) => {
     console.log(pathname, query);
-    if (pathname !== '/s' || !query.components) return;
+    if (!/^\/s/.test(pathname) || !query.components) return;
     let map = {};
     let components = query.components.split(',');
     components.forEach((c) => {
         if (query[c]) {
-            map[c] = query[c].split(',');
+            if (!map[c]) map[c] = {};
+            query[c].split(',').forEach((s) => {
+                map[c][s] = true;
+            });
         }
     });
     return map;
 };
 
-const genShareUrl = (url, componentsMap) => {
+const genShareUrl = (url, components) => {
     let base = location.origin + '/s?url=' + encodeURIComponent(url);
-    let names = [];
-    for (let name in componentsMap) {
-        names.push(name);
-        base += `&${name}=${componentsMap[name].filter((c) => c.show)
-            .map((c) => c.state).join(',')}`;
-    }
-    base += '&components=' + names.join(',');
+    let componentNames = [];
+    iterate(components, (c, componentName) => {
+        if (c._hideAll) return;
+        let states = [];
+        iterate(c.states, (s, stateName) => {
+            console.log(stateName, s);
+            if (!s._hide) states.push(stateName);
+        });
+        componentNames.push(componentName);
+        base += `&${componentName}=${states.join(',')}`
+    });
+    base += '&components=' + componentNames.join(',');
     return base;
 };
 
