@@ -33,7 +33,6 @@ const plugins = [
         allChunks: true
     }),
     new webpack.optimize.OccurenceOrderPlugin(),
-    new webpack.HotModuleReplacementPlugin(),
     new webpack.NoErrorsPlugin()
 ];
 const sassLoader = ExtractTextPlugin.extract('style-loader', [
