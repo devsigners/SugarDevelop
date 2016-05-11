@@ -134,12 +134,14 @@ const showState = (input, component, projectName) => {
         });
     }
 };
-const hideState = (input, component) => {
+const hideState = (input, component, onHideAll) => {
     let stateName = $(input).data('state');
     let index = +$(input).data('index');
     if (!stateName) {
         // hide all
         $(input).parents('.inject-box-body').find('input:checked').click();
+        component._hideAll = true;
+        onHideAll && onHideAll(component);
         return;
     }
     component.states[stateName].$element.hide();
@@ -157,7 +159,7 @@ const hideState = (input, component) => {
     });
 };
 
-const setupComponentsViewer = (iframe, injectedStyle) => {
+const setupComponentsViewer = (iframe, injectedStyle, hooks) => {
     let win = iframe.contentWindow;
     let doc = iframe.contentDocument;
     let $body = $(doc.body);
@@ -202,7 +204,7 @@ const setupComponentsViewer = (iframe, injectedStyle) => {
             if (ev.target.checked) {
                 showState(ev.target, component, __components__.project);
             } else {
-                hideState(ev.target, component);
+                hideState(ev.target, component, hooks && hooks.onHideAll);
             }
         }).on('click', (ev) => {
             ev.stopPropagation();
@@ -255,7 +257,7 @@ const genShareUrl = (url, componentsMap) => {
     return base;
 };
 
-const onComponentToggle = (show, component, reactInstance) => {
+const onComponentToggle = (show, component) => {
     let state = component.states[component._state];
     if (show) {
         component._hideAll = false;

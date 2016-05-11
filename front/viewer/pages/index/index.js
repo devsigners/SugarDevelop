@@ -62,12 +62,18 @@ class IndexPage extends Component {
     _onFrameLoad() {
         console.log('frame load');
         this.setState({
-            __components__: setupComponentsViewer(this.refs.iframe, injectedStyle)
+            __components__: setupComponentsViewer(this.refs.iframe, injectedStyle, {
+                onHideAll: this._onHideAll.bind(this)
+            })
+        });
+    }
+    _onHideAll() {
+        this.setState({
+            __components__: this.state.__components__
         });
     }
     _toggleComponent(ev) {
-        console.log('toggle', ev.target, ev.target.checked);
-        onComponentToggle(ev.target.checked, this.state.__components__.components[ev.target.value], this);
+        onComponentToggle(ev.target.checked, this.state.__components__.components[ev.target.value]);
         this.setState({
             __components__: this.state.__components__
         });
