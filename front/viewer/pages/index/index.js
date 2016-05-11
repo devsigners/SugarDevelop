@@ -18,176 +18,192 @@ const getComments = (el) => {
     }
     return arr;
 };
-
-// scan comments and parse all components info.
-const parseComponents = (comments) => {
-    const re = /(\{[^\{\}]+\})/;
-    const map = {};
-    for(let i = 0; i < comments.length; i += 2) {
-        let start = comments[i];
-        let end = comments[i + 1];
-        if (!end) {
-            console.warn('Has broken comment pair.');
-            console.log(start, end);
-            break;
-        }
-        let val = re.exec(start.textContent);
-        if (!val) {
-            console.warn('Has invalid start comment.');
-            console.log(start);
-            continue;
-        }
-        try {
-            val = JSON.parse(val[1]);
-            if (!map[val.name]) {
-                map[val.name] = [];
-            }
-            val.element = start.nextElementSibling;
-            map[val.name].push(val);
-        } catch(e) {
-            console.warn('Start comment\'s component info is invalid JSON.');
-            console.log(e.stack);
-        }
+function iterate(map, cb) {
+    for (let prop in map) {
+        if (cb(map[prop], prop) === false) break;
     }
-    return map;
-};
+}
 
-
-const scanComponentInfo = (components) => {
-    if (!components || !components.length) return;
-    let content = `<label><input type="checkbox" data-is-all="yes" data-index=${-1} value="all" />All</label>`;
-    let hasDefaultShow = false;
-    let hasPrimaryComponent = false;
-    let primaryComponentIndex = -1;
-    components.forEach((c, index) => {
-        content += `<label><input type="checkbox" ${(index === 0 || c.show) ?
-            'checked' : ''} data-index=${index} value=${c.state} />${c.label}</label>`;
-        if (c.show) {
-            hasDefaultShow = true;
-        }
-        if (c.isPrimary) {
-            hasPrimaryComponent = true;
-            primaryComponentIndex = index;
-        }
-    });
-    let name = components[0].name;
+/**
+ * generate toolbox
+ * @param  {String} key       component's key/name, such as `passenger`
+ * @param  {Object} component component, has multiple states, like {configFile, states, type, template}
+ * @return {Object}           object of {$boxHead, $boxBody, $box}
+ */
+const genToolbox = (key, component) => {
+    if (!component) return;
+    let content = `<label><input type="checkbox" data-is-all="yes" value="all" />All</label>`;
+    let count = 0;
+    for (let stateName in component.states) {
+        let state = component.states[stateName];
+        state.displayIndex = count++;
+        content += `<label><input type="checkbox" ${state.$element ?
+            'checked' : ''} data-state=${stateName} data-index=${state.displayIndex} value=${state.name} />${state.name}</label>`;
+    }
+    let name = component.name;
     let $boxHead = $(`<div class="inject-box-head" data-name="${name}">${name}</div>`);
     let $boxBody = $(`<div class="inject-box-body">${content}</div>`);
     return {
         $boxHead,
         $boxBody,
-        $box: $('<div>').addClass('inject-box').attr('data-count', components.length)
-            .attr('data-for', 'component-' + name).append($boxHead).append($boxBody),
-        hasDefaultShow,
-        hasPrimaryComponent,
-        primaryComponentIndex
+        $box: $('<div>').addClass('inject-box').attr('data-count', count)
+            .attr('data-for', key).append($boxHead).append($boxBody)
     };
 };
-const genToolboxes = (componentsMap, $body) => {
-    for (let name in componentsMap) {
-        let components = componentsMap[name];
-        let { $box, $boxHead, $boxBody,
-            hasDefaultShow,
-            hasPrimaryComponent,
-            primaryComponentIndex } = scanComponentInfo(components);
-        if (!hasDefaultShow) {
-            if (!hasPrimaryComponent) primaryComponentIndex = 0;
-            components[primaryComponentIndex].show = true;
-        }
-        $body.append($box.hide());
-        $boxHead.on('click', () => {
-            $boxBody.toggle();
-        });
-        $box.on('click', 'input', (ev) => {
-            let i = +$(ev.target).data('index');
-            // 如果只剩一个checkbox，则不可以勾掉
-            if (i >= 0 && !ev.target.checked && !$box.find('input').filter((i, el) => el.checked).length) {
-                ev.target.checked = true;
-                return;
-            }
-            toggleComponent(ev.target.checked ? 'show' : 'hide', $boxBody.find('input'), i, components);
-        }).on('click', (ev) => {
-            ev.stopPropagation();
-        });
-        components.forEach((c, index) => {
-            c.$toolbox = $box;
-            let $el = $(c.element).addClass('ui-component');
-            $el.on('click', (ev) => {
-                ev.stopPropagation();
-                if (c.isActive) return;
-                components.forEach(c => ($(c.element).removeClass('ui-component-selected'), c.isActive = false));
-                c.isActive = true;
-                $el.addClass('ui-component-selected');
-                showToolbox($box, $el, c);
-            });
-            if (!c.show) {
-                setTimeout(() => {
-                    $el.hide();
-                }, 0);
-            }
-        });
-    }
-};
-
-const setToolboxPos = ($toolbox, $component) => {
-    let offset = $component.offset();
-    let width = $component.width();
+const setToolboxPos = ($toolbox, $element) => {
+    let offset = $element.offset();
+    let width = $element.width();
     return $toolbox.css({
         left: offset.left + width,
         top: parseInt(offset.top, 10) - 28
     });
 };
-const showToolbox = ($toolbox, $component, component) => {
-    console.log('showToolbox');
-    setToolboxPos($toolbox, $component).show()
+const showToolbox = ($toolbox, $element, state) => {
+    setToolboxPos($toolbox, $element).show()
         .find('.inject-box-head')
-        .html(`<span class="component-name">${component.name}</span>：<span class="component-label">${component.label}</span>`);
+        .html(`<span class="component-name">${state.name}</span>：<span class="component-label">${state.name}</span>`);
 };
-const toggleComponent = (action, $inputs, index, components) => {
-    let checked = action === 'show' ? true : false;
-    let $normalInputs = $inputs.filter((index) => index > 0);
-    if (index === -1) {
-        $normalInputs.prop('checked', checked);
-        //$(components.map((c) => c.element))[action]();
-        components.forEach((c) => {
-            $(c.element)[action]();
-            c.show = checked;
-        });
-        if (!checked) {
-            $normalInputs.eq(0).prop('checked', true);
-            toggleComponent('show', $inputs, 0, components)
-        }
-    } else {
-        if (!$normalInputs.filter((i, el) => el.checked !== checked).length) {
-            $inputs.eq(0).prop('checked', checked);
-        }
-        components[index].show = checked;
-        $(components[index].element)[action]();
-    }
-
-    var activeComponentIndex = -1;
-    components.some((c, i) => {
-        if (c.isActive) {
-            activeComponentIndex = i;
-            return true;
+const setToolboxPosToActiveStateEl = (component) => {
+    iterate(component.states, s => {
+        if (s.isActive) {
+            setToolboxPos(s.$toolbox, s.$element);
+            return false;
         }
     });
-    // 如果隐藏某个状态的组件，且组件不在显示toolbox组件的下方，隐藏toolbox
-    if (!checked) {
-        if (index === -1) {
-            index = 0;
+};
+/**
+ * handle state element after element inserted
+ * @param  {Object} state     state of the component
+ * @param  {Object} component the component
+ * @return {Object}           the element
+ */
+const initComponentStateElement = (state, component) => {
+    console.log('initComponentStateElement', state);
+    return state.$element.addClass('ui-component').on('click', (ev) => {
+        ev.stopPropagation();
+        console.log('$element click', state);
+        if (state.isActive) {
+            return setToolboxPos(state.$toolbox, state.$element);
         }
-        if (activeComponentIndex > index) {
-            console.log('命中', activeComponentIndex);
-            components[activeComponentIndex].isActive = false;
-            $(components[activeComponentIndex].element).removeClass('ui-component-selected');
-            components[activeComponentIndex].$toolbox.hide();
-        }
-    } else {
-        // 否则更新toolbox的位置
-        setToolboxPos(components[activeComponentIndex].$toolbox, $(components[activeComponentIndex].element));
+        iterate(component.states, (state) => (state.isActive = false,
+            state.$element && state.$element.removeClass('ui-component-selected')));
+        state.isActive = true;
+        state.$element.addClass('ui-component-selected');
+        showToolbox(state.$toolbox, state.$element, state);
+    });
+};
+
+const showState = (input, component, projectName) => {
+    let stateName = $(input).data('state');
+    console.log(stateName, projectName);
+    if (!stateName) {
+        // show all
+        return;
     }
-}
+    const state = component.states[stateName];
+    if (state.fileLoaded) {
+        state.$element.show();
+        setToolboxPosToActiveStateEl(component);
+    } else {
+        $.ajax({
+            url: `/components/${stateName}`,
+            data: {
+                project: projectName,
+                configFile: component.configFile,
+                state: stateName
+            },
+            type: 'GET'
+        }).then((partial) => {
+            state.fileLoaded = true;
+            let $element = $(partial);
+            let lastNearbyState;
+            // find where to insert
+            iterate(component.states, (s) => {
+                if (s.$element) {
+                    if (s.displayIndex > state.displayIndex) {
+                        $element.insertBefore(s.$element);
+                        lastNearbyState = null;
+                        return false;
+                    } else {
+                        lastNearbyState = s;
+                    }
+                }
+            });
+            if (lastNearbyState) {
+                $element.insertAfter(lastNearbyState.$element);
+            }
+            // partial sometimes include comment, so the $element could be like
+            // [comment, text, div.className], so fix it.
+            state.$element = $element.length > 1 ? $element.filter((i, el) => el.nodeType === 1) : $element;
+            initComponentStateElement(state, component);
+            setToolboxPosToActiveStateEl(component);
+        });
+    }
+};
+const hideState = (input, component) => {
+    let stateName = $(input).data('state');
+    let index = +$(input).data('index');
+    console.log(stateName);
+    if (!stateName) {
+        // show all
+        return;
+    }
+    component.states[stateName].$element.hide();
+    // when the state el to hide is in front of the active state el;
+    // hide the toolbox
+    iterate(component.states, s => {
+        if (s.isActive) {
+            if (s.displayIndex >= index) {
+                s.isActive = false;
+                s.$element.removeClass('ui-component-selected');
+                s.$toolbox.hide();
+            }
+            return false;
+        }
+    });
+};
+
+const setupComponentsViewer = (map, $body, $win) => {
+    let components = map.components;
+    for (let name in components) {
+        let component = components[name];
+        let {
+            $box, $boxHead, $boxBody
+        } = genToolbox(name, component);
+        $body.append($box.hide());
+        $boxHead.on('click', () => {
+            $boxBody.toggle();
+        });
+        $box.on('click', 'input', (ev) => {
+            console.log('click input', ev.target);
+            //let state = $(ev.target).data('state');
+            if (ev.target.checked) {
+                showState(ev.target, component, map.project);
+            } else {
+                hideState(ev.target, component);
+            }
+        }).on('click', (ev) => {
+            ev.stopPropagation();
+        });
+        iterate(component.states, (state, stateName) => {
+            state.$toolbox = $box;
+            if (state.$element) {
+                state.fileLoaded = true;
+                initComponentStateElement(state, component);
+            }
+        });
+    }
+    // hide all toolbox
+    $win.on('click', (ev) => {
+        $body.find('.inject-box').hide();
+        for (let name in components) {
+            iterate(components[name].states, (state) => {
+                state.isActive = false;
+                state.$element && state.$element.removeClass('ui-component-selected');
+            });
+        }
+    });
+};
 
 // url is like: http://0.0.0.0:3100/s?components=passenger,panel&pannel=state1,state2,state3&passenger=language-en,normal&url=http%3A%2F%2Flocalhost%3A3000%2Fbook.html
 const parseUrlQuery = ({pathname, query}) => {
@@ -231,7 +247,7 @@ class IndexPage extends Component {
         this.state = {
             pages: [{
                 label: '订',
-                url: '/book'
+                url: '/viewer/book'
             }, {
                 label: 'X',
                 url: '/book'
@@ -271,35 +287,32 @@ class IndexPage extends Component {
         let doc = this.refs.iframe.contentDocument;
         let $body = $(doc.body);
         let $win = $(win);
+
+        const __components__ = win.__components__;
+        if (!__components__) throw new Error('invalid componentsMap');
+
         $(doc.head).append('<style>' + injectedStyle + '</style>');
-        let comments = getComments(doc.body).filter((v) => {
-            return /\$component-(start|end)\$/i.test(v.textContent);
-        });
-        let componentsMap = parseComponents(comments);
-        if (this.componentsMap) {
-            let map = this.componentsMap;
-            for (let name in map) {
-                if (componentsMap[name]) {
-                    componentsMap[name].forEach((c) => {
-                        if (map[name].indexOf(c.state) > -1) {
-                            c.show = true;
-                        }
-                    });
-                }
-            }
-        }
-        this._componentsMap = componentsMap;
-        console.log(componentsMap);
-        $win.on('click', (ev) => {
-            $body.find('.inject-box').hide();
-            for (let name in componentsMap) {
-                componentsMap[name].forEach((c) => {
-                    c.isActive = false;
-                    $(c.element).removeClass('ui-component-selected');
-                });
+        getComments(doc.body).forEach((v) => {
+            if(/\__component_key__=(\S+)/i.test(v.textContent)) {
+                let c = __components__.components[__components__.keyComponentMap[RegExp.$1]];
+                c.states[c._state].$element = $(v.nextElementSibling);
             }
         });
-        genToolboxes(componentsMap, $body);
+        console.log(__components__);
+        // let componentsMap = parseComponents(comments);
+        // if (this.componentsMap) {
+        //     let map = this.componentsMap;
+        //     for (let name in map) {
+        //         if (componentsMap[name]) {
+        //             componentsMap[name].forEach((c) => {
+        //                 if (map[name].indexOf(c.state) > -1) {
+        //                     c.show = true;
+        //                 }
+        //             });
+        //         }
+        //     }
+        // }
+        setupComponentsViewer(__components__, $body, $win);
     }
     _resizeFrame(width, animate) {
         if (typeof width === 'number' && width < 320) width = 320;
