@@ -41,6 +41,9 @@ app.use(mount('/viewer', (ctx, next) => {
 app.use(mount('/components', (ctx, next) => {
     return renderPartial(ctx, next) || next();
 }));
+app.use(mount('/s', (ctx, next) => {
+    return serveViewer(ctx, next);
+}));
 
 const isRequestHtml = (ctx) => {
     return ctx.accepts('html');
