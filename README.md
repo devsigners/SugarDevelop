@@ -1,52 +1,60 @@
-# static-site-env
+<p align="center"><img width="69" src="https://cloud.githubusercontent.com/assets/8046480/15187341/565c3518-17d3-11e6-8d8e-5ecf132f6681.png"></p>
+<h4 align="center">SugarDevelop</h4>
 
-> 一套基于 Koa + Handlebars 静态页面开发环境.
+Sugar Develop is a user-friendly static pages develop environment based on `Koa` and `Handlebars`.
 
-## 目标与适用
+[![Dependency Status](https://david-dm.org/creeperyang/SugarDevelop.svg)](https://david-dm.org/creeperyang/SugarDevelop)
+[![devDependency Status](https://david-dm.org/creeperyang/SugarDevelop/dev-status.svg)](https://david-dm.org/creeperyang/SugarDevelop#info=devDependencies)
 
-- 在打包工具流行的今天，各种定制化的工作流纷繁复杂。而有时候，标准的，约定的工作流可能更高效。
-- Java/PHP模板的渲染往往需要一整套后台软件，对前端（尤其重构）不友好。
+### Targets
 
-本项目即为解决以上痛点设计的一套静态页面开发环境，模板语法尽量友好，剥离后台开发环境依赖，页面修改可以实时刷新和预览。
+- Enhance handlebars template, like PHP/Java template as much as possible.
+- Standard workflow, few config, and pure JavaScript env without other dependencies.
+- Components develop.
 
-## 开发流程与目录说明
+Hope the develop environment will make static page development much easier.
 
-`npm install && npm start`后即可在`http://0.0.0.0:3000`浏览页面。
+### Features
 
-开发目录在`front/src`，目录结构如下：
+- Enhanced handlebars template: support yaml header, support data file, support layout specified in template and so on.
+- Components.
+- Koa server and some useful npm scripts. Such as build totally static html pages from templates, build components map.
+
+### Workflow
+
+The simplest way to run is exec `npm install && npm start`, then view `http://0.0.0.0:3000` for your static pages.
+
+Develop dir is `front/src`:
 
 ```bash
 front/src
-    ├── group                  # 项目组
-    │   ├── test               # 项目组/子项目
-    │   │   ├── layouttt       # 自定义layout目录
-    │   │   ├── myhelper       # 自定义helper目录
-    │   │   ├── mypartial      # 自定义partial目录
-    │   │   └── subdir         # 子文件夹
-    │   └── test2              # 项目组/子项目
-    ├── index                  # 子项目
-    └── shared                 # 共享目录
-        ├── data               # 公用数据目录
-        ├── helpers            # 公用helper目录
-        ├── layouts            # 公用layout目录
-        ├── partials           # 公用partial目录
-        │   └── components     # partials/components子目录
-        └── static             # 公用静态资源目录
+    ├── group                  # project group
+    │   ├── test               # sub project
+    │   │   ├── layouttt       # custom layout
+    │   │   ├── myhelper       # custom helper
+    │   │   ├── mypartial      # custom partial
+    │   │   └── subdir         # normal sub dir
+    │   └── test2              # sub project
+    ├── index                  # project
+    └── shared                 # shared resources
+        ├── data               # data
+        ├── helpers            # handlebars helpers
+        ├── layouts            # handlebars layouts
+        ├── partials           # handlebars partials
+        │   └── components     # partials/components
+        └── static             # static resources
             ├── images
             ├── scripts
             └── styles
 ```
 
-我们只需要在`front/src`下创建我们自己的项目目录，写配置文件（可选，yaml语法），然后写模板（熟悉的handlebars）即可开发静态页面。在浏览器输入`localhost:3000/[group/]project/page.html`即可访问对应的`front/src/[group/]project/page.html`文件。
+We only need to
 
-## build
+1. mkdir dir at `front/src` as our project root dir.
+2. write config file (optional, yaml format).
+3. And then write your page with handlebars template or just static html.
+4. Wow, just view `http://0.0.0.0:3000/[group/]project/page.html`!
 
-`npm run build`命令可以把`front/src`下所有模板编译为纯静态页，编译目录为`front/dest`。
-
-编译后的目录结构保持一致。需要注意，静态资源的`src`没有做任何调整，静态资源也没有copy到dest。所以可能需要配合`gulp`来写一些task使`front/dest`目录可以在浏览器直接预览。
-
-## 许可
+### License
 
 [MIT](https://opensource.org/licenses/mit-license.php)
-
-欢迎提交建议和PR。
