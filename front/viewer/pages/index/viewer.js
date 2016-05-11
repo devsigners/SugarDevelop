@@ -267,7 +267,7 @@ const setupComponentsViewer = (iframe, injectedStyle, hooks, location) => {
 // url is like: /s?components=passenger,panel&pannel=state1,state2,state3&passenger=language-en,normal&url=http%3A%2F%2Flocalhost%3A3000%2Fbook.html
 const parseUrlQuery = ({pathname, query}) => {
     console.log(pathname, query);
-    if (!/^\/s/.test(pathname) || !query.components) return;
+    if (!/^\/s/.test(pathname) || query.components == null) return;
     let map = {};
     let components = query.components.split(',');
     components.forEach((c) => {
