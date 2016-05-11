@@ -2,6 +2,7 @@
 
 const path = require('path');
 const Handlebars = require('handlebars');
+const debug = require('debug')('khbs');
 
 const setting = require('./setting');
 const Scanner = require('./scanner.js');
@@ -106,6 +107,7 @@ class Hbs {
         return genPartialInfoComment.apply(this, arguments);
     }
     _getDynamicPartialName(dynamic, data, map) {
+        debug('getDynamicPartialName, partial info: %o, data: %o, map: %o', dynamic, data, map);
         if (dynamic.context === '__component__') {
             if (!map) map = JSON.parse(util.readSync(this.resolvePath('./component.json', null, null, dynamic.baseUrl)));
             if (!data['__component__']) data['__component__'] = map.states.default.__file__;
@@ -127,6 +129,7 @@ class Hbs {
             return;
         }
         const url = this.resolvePath(name, 'partial', null, baseUrl);
+        debug('installPartial, url is %s', url);
         return util.read(url)
             .then(data => {
                 // check params and dispaly partial info with comment
@@ -147,6 +150,7 @@ class Hbs {
     }
     loadData(name, baseUrl) {
         const url = this.resolvePath(name, 'data', '.json', baseUrl);
+        debug('load data, url is %s', url);
         if (!this.options.disableCache && this.cache[url] && this.cache[url].result) {
             return Promise.resolve(this.cache[url].result);
         }
@@ -170,6 +174,7 @@ class Hbs {
      * @return {Promise}     promise
      */
     render(url, data, state) {
+        debug('Hbs.render, url is %s, data is %o, state is %o', url, data, state);
         const cache = this.cache;
         this.currentState = state;
         this.currentState.viewUrl = url;
@@ -208,6 +213,7 @@ class Hbs {
             promises = promises.slice(2);
             // then check if there is any dynamic partials
             if (this.dynamicPartials) {
+                debug('will resolve dynamic partials, count: %d', this.dynamicPartials.length);
                 promises = promises.concat(this.dynamicPartials.map((dynamic) => {
                     // install dynamic partial dependencies
                     return this.installPartial(this._getDynamicPartialName(dynamic, data, partialMap),
@@ -223,6 +229,7 @@ class Hbs {
         }) : this.cache[url].result;
     }
     renderPartial(urlInfo, data) {
+        debug('Hbs.renderPartial, urlInfo is %o, data is %o', urlInfo, data);
         // simulate render view
         data = data || {};
         const fakeUrl = path.resolve(this.options.root, urlInfo.project, '__fake__.html');
@@ -241,8 +248,9 @@ class Hbs {
                     viewUrl: fakeUrl
                 };
                 // specify component state, if empty, will be set to `default` lately
-                data.__component__ = urlInfo.state;
+                data.__component__ = json.states[urlInfo.state].__file__;
                 componentMap = json;
+                debug('Hbs.renderPartial, \n\tpartialUrl is %s, \n\tfakeUrl is %s', relativeUrl, fakeUrl);
                 return this.compile(`{{> ./${relativeUrl} $$info='status=hide'}}`,
                     false, fakeUrl);
             })

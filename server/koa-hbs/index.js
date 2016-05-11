@@ -1,6 +1,7 @@
 'use strict';
 
 const path = require('path');
+const debug = require('debug')('khbs');
 const Hbs = require('./hbs');
 const util = require('./util');
 
@@ -23,6 +24,7 @@ const parseUrl = (url, isProjectGroup) => {
 
 const loadConfig = (projectName, options, cache) => {
     const url = path.join(options.root, projectName, options.configFileName);
+    debug('load config, url is %s', url);
     if (!options.disableCache && cache[url]) {
         return Promise.resolve(cache[url].result || cache[url]);
     }
@@ -46,6 +48,7 @@ const createRenderer = (hbs) => {
     const options = hbs.options;
     // this must be bind to koa instance
     return function(url, locals) {
+        debug('render url is %s, data is %o', url, locals);
         locals = locals || {};
         util.merge(locals, this.state, hbs.locals);
         const extname = path.extname(url);
@@ -79,6 +82,7 @@ const createPartialRenderer = (hbs) => {
 };
 
 exports = module.exports = (options) => {
+    debug('start, attach render and renderPartial method, options is %o', options);
     const hbs = new Hbs(options);
     const render = createRenderer(hbs);
     const renderPartial = createPartialRenderer(hbs);

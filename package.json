@@ -4,6 +4,7 @@
   "description": "static pages develop environment",
   "main": "index.js",
   "dependencies": {
+    "debug": "^2.2.0",
     "handlebars": "^4.0.5",
     "koa": "^2.0.0",
     "koa-logger": "^2.0.0",
@@ -38,6 +39,7 @@
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
     "start": "node server/index",
+    "start:debug": "DEBUG=khbs node server/index",
     "build": "rm -rf front/dest && node tools/build",
     "build:viewer": "node_modules/.bin/webpack --config tools/webpack.config.js",
     "build:components": "node tools/genComponentsMap"
