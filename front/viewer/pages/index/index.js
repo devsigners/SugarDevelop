@@ -2,7 +2,8 @@ import React, { PropTypes, Component } from 'react';
 import {
     setupComponentsViewer,
     parseUrlQuery,
-    genShareUrl
+    genShareUrl,
+    onComponentToggle
 } from './viewer.js';
 // styles
 import styles from './style.scss';
@@ -60,7 +61,16 @@ class IndexPage extends Component {
     }
     _onFrameLoad() {
         console.log('frame load');
-        setupComponentsViewer(this.refs.iframe, injectedStyle);
+        this.setState({
+            __components__: setupComponentsViewer(this.refs.iframe, injectedStyle)
+        });
+    }
+    _toggleComponent(ev) {
+        console.log('toggle', ev.target, ev.target.checked);
+        onComponentToggle(ev.target.checked, this.state.__components__.components[ev.target.value], this);
+        this.setState({
+            __components__: this.state.__components__
+        });
     }
     _resizeFrame(width, animate) {
         if (typeof width === 'number' && width < 320) width = 320;
@@ -79,19 +89,13 @@ class IndexPage extends Component {
         alert(url);
     }
     componentDidMount() {
-        console.log('mount');
-
         this.refs.iframe.onload = () => {
-            console.log('onload');
             this._onFrameLoad();
         };
-        // $(this.refs.iframe).css({
-        //     width: '100%',
-        //     height: 'calc(100vh - 36px)'
-        // });
     }
     render() {
         console.log('render');
+        const components = this.state.__components__ && this.state.__components__.components;
         return (
             <div>
                 <header className={styles.header}>
@@ -108,6 +112,22 @@ class IndexPage extends Component {
                                 this.state.sizes.map((v, i) => <li className={styles.menuItem} key={i}><span onClick={this._resizeFrame.bind(this, v.size, true)}>{v.label}</span></li>)
                             }
                         </ul>
+                    </nav>
+                    <nav className={[styles.nav, styles.popoverParent].join(' ')}>
+                        <ul className={[styles.menuContainer, styles.popoverHeader].join(' ')}>
+                            <li className={styles.menuItem}>组件Map</li>
+                        </ul>
+                        <div className={styles.popover}>
+                            {
+                                components ? Object.keys(components).map((key, i) => {
+                                    return (
+                                        <label key={i}>
+                                            <input type="checkbox" checked={!components[key]._hideAll} value={key} onChange={this._toggleComponent.bind(this)}/>
+                                            <span>{components[key].name}</span>
+                                        </label>);
+                                }) : null
+                            }
+                        </div>
                     </nav>
                     <nav className={styles.nav}>
                         <ul className={styles.menuContainer}>

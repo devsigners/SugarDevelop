@@ -225,6 +225,8 @@ const setupComponentsViewer = (iframe, injectedStyle) => {
             });
         }
     });
+
+    return __components__;
 };
 
 // url is like: http://0.0.0.0:3100/s?components=passenger,panel&pannel=state1,state2,state3&passenger=language-en,normal&url=http%3A%2F%2Flocalhost%3A3000%2Fbook.html
@@ -253,9 +255,31 @@ const genShareUrl = (url, componentsMap) => {
     return base;
 };
 
+const onComponentToggle = (show, component, reactInstance) => {
+    let state = component.states[component._state];
+    if (show) {
+        component._hideAll = false;
+        // show default
+        state.$toolbox.find('input')
+            .eq(state.displayIndex + 1).click();
+    } else {
+        component._hideAll = true;
+        // hide all
+        let $checkboxes = state.$toolbox.find('input');
+        if (!$checkboxes[0].checked) {
+            $checkboxes.slice(1).each((i, el) => {
+                el.checked && el.click();
+            });
+        } else {
+            $checkboxes.eq(0).click();
+        }
+    }
+};
+
 export {
     getComments,
     setupComponentsViewer,
     parseUrlQuery,
-    genShareUrl
+    genShareUrl,
+    onComponentToggle
 };
