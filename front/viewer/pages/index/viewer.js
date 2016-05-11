@@ -54,10 +54,10 @@ const setToolboxPos = ($toolbox, $element) => {
         top: parseInt(offset.top, 10) - 28
     });
 };
-const showToolbox = ($toolbox, $element, state) => {
+const showToolbox = ($toolbox, $element, stateName, componentName) => {
     setToolboxPos($toolbox, $element).show()
         .find('.inject-box-head')
-        .html(`<span class="component-name">${state.name}</span>：<span class="component-label">${state.name}</span>`);
+        .html(`<span class="component-name">${componentName}</span>：<span class="component-label">${stateName}</span>`);
 };
 const setToolboxPosToActiveStateEl = (component) => {
     iterate(component.states, s => {
@@ -83,7 +83,7 @@ const initComponentStateElement = (state, component) => {
             state.$element && state.$element.removeClass('ui-component-selected')));
         state.isActive = true;
         state.$element.addClass('ui-component-selected');
-        showToolbox(state.$toolbox, state.$element, state);
+        showToolbox(state.$toolbox, state.$element, state.name, component.name);
     });
 };
 
