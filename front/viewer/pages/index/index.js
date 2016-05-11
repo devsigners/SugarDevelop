@@ -78,10 +78,8 @@ const setToolboxPosToActiveStateEl = (component) => {
  * @return {Object}           the element
  */
 const initComponentStateElement = (state, component) => {
-    console.log('initComponentStateElement', state);
     return state.$element.addClass('ui-component').on('click', (ev) => {
         ev.stopPropagation();
-        console.log('$element click', state);
         if (state.isActive) {
             return setToolboxPos(state.$toolbox, state.$element);
         }
@@ -95,9 +93,9 @@ const initComponentStateElement = (state, component) => {
 
 const showState = (input, component, projectName) => {
     let stateName = $(input).data('state');
-    console.log(stateName, projectName);
     if (!stateName) {
         // show all
+        $(input).parents('.inject-box-body').find('input:not(:checked)').click();
         return;
     }
     const state = component.states[stateName];
@@ -143,9 +141,9 @@ const showState = (input, component, projectName) => {
 const hideState = (input, component) => {
     let stateName = $(input).data('state');
     let index = +$(input).data('index');
-    console.log(stateName);
     if (!stateName) {
-        // show all
+        // hide all
+        $(input).parents('.inject-box-body').find('input:checked').click();
         return;
     }
     component.states[stateName].$element.hide();
@@ -174,9 +172,7 @@ const setupComponentsViewer = (map, $body, $win) => {
         $boxHead.on('click', () => {
             $boxBody.toggle();
         });
-        $box.on('click', 'input', (ev) => {
-            console.log('click input', ev.target);
-            //let state = $(ev.target).data('state');
+        $box.on('change', 'input', (ev) => {
             if (ev.target.checked) {
                 showState(ev.target, component, map.project);
             } else {
@@ -243,7 +239,6 @@ class IndexPage extends Component {
             //     url = '/proxy?url=' + encodeURIComponent(url);
             // }
         }
-        console.log(this.componentsMap, url);
         this.state = {
             pages: [{
                 label: '订',
