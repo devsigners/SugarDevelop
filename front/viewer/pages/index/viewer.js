@@ -163,7 +163,12 @@ const hideState = (input, component, onHideAll) => {
         }
     });
     // manually set all-checked to false, and this wont trigger change event.
-    $(input).parents('.inject-box-body').find('input')[0].checked = false;
+    let $checkboxes = $(input).parents('.inject-box-body').find('input');
+    $checkboxes[0].checked = false;
+    if (!$checkboxes.filter((i, el) => el.checked).length) {
+        component._hideAll = true;
+        onHideAll && onHideAll(component);
+    }
 };
 
 const setupComponentsViewer = (iframe, injectedStyle, hooks) => {
