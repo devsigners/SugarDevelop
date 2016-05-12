@@ -2,12 +2,30 @@ import React from 'react';
 import ReactDOM from 'react-dom';
 import ReactDOMServer from 'react-dom/server';
 import AppRoutes from './routes.js';
+import viewerData from '../src/viewerData';
 import './styles/app.scss';
 
 class App {
     render(element) {
         var appRootElement = React.createElement(AppRoutes, {
-            state: {}
+            state: {
+                pages: viewerData.map(d => {
+                    d.url = '/viewer/' + d.name;
+                    return d;
+                }),
+                sizes: [
+                    {
+                        label: 'M',
+                        size: 980
+                    }, {
+                        label: 'L',
+                        size: 1200
+                    }, {
+                        label: 'Full',
+                        size: '100%'
+                    }
+                ]
+            }
         });
 
         if (element) {

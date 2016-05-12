@@ -19,28 +19,8 @@ class IndexPage extends Component {
             url = decodeURIComponent(props.location.query.url);
         }
         this.state = {
-            pages: [{
-                label: '订',
-                url: '/viewer/book'
-            }, {
-                label: 'X',
-                url: '/book'
-            }, {
-                label: '其它',
-                url: '/book'
-            }],
-            sizes: [
-                {
-                    label: 'M',
-                    size: 980
-                }, {
-                    label: 'L',
-                    size: 1200
-                }, {
-                    label: 'Full',
-                    size: '100%'
-                }
-            ],
+            pages: this.props.route.pages,
+            sizes: this.props.route.sizes,
             iframe: {
                 src: url
             }

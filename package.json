@@ -43,9 +43,10 @@
     "start": "node server/index",
     "start:debug": "DEBUG=khbs node server/index",
     "build:static": "rm -rf front/dest && node tools/build",
-    "build": "npm run build:components && npm run build:viewer",
+    "build": "npm run build:components && npm run build:viewerdata && npm run build:viewer",
     "build:viewer": "node_modules/.bin/webpack --config tools/webpack.config.js",
-    "build:components": "DEBUG=tool:cmap node tools/genComponentsMap"
+    "build:components": "DEBUG=tool:cmap node tools/genComponentsMap",
+    "build:viewerdata": "DEBUG=tool:viewerdata node tools/genViewerData"
   },
   "repository": {
     "type": "git",

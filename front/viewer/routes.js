@@ -5,8 +5,8 @@ import { browserHistory } from 'react-router'
 import IndexPage from './pages/index';
 
 class AppRoot extends React.Component {
-    constructor() {
-        super();
+    constructor(props) {
+        super(props);
     };
     static propTypes = {
         children: PropTypes.object
@@ -31,7 +31,7 @@ class AppRoutes extends Component {
             <Router history={browserHistory}>
                 <Route path="/" component={AppRoot}>
                     <IndexRoute component={IndexPage}/>
-                    <Route path="*" component={IndexPage} />
+                    <Route path="*" component={IndexPage} {...this.props.state}/>
                 </Route>
             </Router>
         );

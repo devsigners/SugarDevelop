@@ -6,3 +6,4 @@ front/dest
 ._*
 vdest
 front/src/**/components.js
+front/src/**/viewerData.js
