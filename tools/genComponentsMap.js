@@ -1,6 +1,7 @@
 'use strict';
 
 const path = require('path');
+const debug = require('debug')('tool:cmap');
 const util = require('./util');
 const config = require('../config');
 
@@ -19,8 +20,8 @@ const generateMapFile = (map) => {
 };
 
 util.list(config.staticRoot, ['**/component.json']).then((files) => {
+    debug('files catched %o', files);
     if (!files || !files.length) {
-        console.log('found no components info, will exit');
         process.exit(0);
     };
     res.files = files;
@@ -83,9 +84,10 @@ util.list(config.staticRoot, ['**/component.json']).then((files) => {
         promises.push(util.write(path.resolve(config.staticRoot, pro, 'components.js'),
             generateMapFile(res[pro])));
     }
+    debug('generated map amounts to %d, component.json updated amounts to %d', promises.length, writePromise.length);
     return Promise.all(promises.concat(writePromise));
 }).then(() => {
-    console.log('successfully gen components map.');
+    debug('Done!');
 }).catch((err) => {
     console.error(err);
 });
