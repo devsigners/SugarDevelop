@@ -39,7 +39,7 @@ app.use(mount('/viewer', (ctx, next) => {
     });
 }));
 app.use(mount('/components', (ctx, next) => {
-    return renderPartial(ctx, next) || next();
+    return renderComponent(ctx, next) || next();
 }));
 app.use(mount('/s', (ctx, next) => {
     return serveViewer(ctx, next);
@@ -60,18 +60,14 @@ const renderView = (ctx, next) => {
         config.hbs.onerror(err, ctx, next);
     });
 };
-const renderPartial = (ctx, next) => {
+const renderComponent = (ctx, next) => {
     if (ctx.method !== 'HEAD' && ctx.method !== 'GET') return;
     if (ctx.body != null || ctx.status !== 404) return;
-    // ctx.query must be like:
-    // {
-    //     project: 'book',
-    //     configFile: 'book/partials/components/passenger/component.json'
-    // }
-    return ctx.renderPartial(ctx.query).then(() => {
+    // ctx.path must be like: /project/component/state
+    return ctx.renderComponent(ctx.path).then(() => {
         return next();
     }).catch(err => {
-        console.log('partial error', err.stack);
+        console.log('component error', err.stack);
     });
 };
 

@@ -25,7 +25,7 @@ const hbsOptions = {
     templateOptions: {},
     configFileName: '.config.yml',
     onerror: (err, ctx, next) => {
-        console.log('hbs render error: ', err.message);
+        console.log('hbs render error: ', err.stack);
     }
 };
 
