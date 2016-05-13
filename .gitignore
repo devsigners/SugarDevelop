@@ -3,4 +3,7 @@ node_modules
 *.log
 /tmp
 front/dest
-_*
+._*
+vdest
+front/src/**/components.js
+front/src/**/viewerData.js

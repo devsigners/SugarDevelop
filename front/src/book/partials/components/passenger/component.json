@@ -1,0 +1,27 @@
+{
+	"name": "乘客",
+	"author": "who",
+	"type": "d",
+	"template": "index",
+	"pageNumber": 2,
+	"states": {
+		"default": {
+			"file": "base",
+			"name": "默认",
+			"data": null
+		},
+		"en": {
+			"file": "en",
+			"name": "英文"
+		},
+		"error": {
+			"file": "error",
+			"name": "错误"
+		}
+	},
+	"configFile": "book/partials/components/passenger/component.json",
+	"_key": "_component_14628652118600244",
+	"_state": "default",
+	"_id": "passenger",
+	"_stateFile": "base"
+}

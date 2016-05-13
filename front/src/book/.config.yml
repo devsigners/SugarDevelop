@@ -1,0 +1,6 @@
+# project metadata
+project:
+    name: book # 与项目目录一致，比如`group/proj`
+    label: 订
+
+# hbs config

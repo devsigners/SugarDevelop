@@ -1,0 +1,19 @@
+{
+	"name": "航班信息",
+	"type": "s",
+	"states": {
+		"nostopShared": {
+			"file": "nostop_shared",
+			"name": "直飞&共享航班"
+		},
+		"onewayStop": {
+			"file": "onewayStop",
+			"name": "单程中转展开"
+		}
+	},
+	"configFile": "book/partials/components/flightInfo/component.json",
+	"_key": "_component_14630429726945878",
+	"_state": "nostopShared",
+	"_id": "flightInfo",
+	"_stateFile": "nostop_shared"
+}

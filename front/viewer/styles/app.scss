@@ -1,0 +1,42 @@
+body {
+    padding: 0;
+    margin: 0;
+    background-color: white;
+    color: #333;
+    font-size: 12px;
+    font-family: Tahoma, Arial, 'Hiragino Sans GB', \5b8b\4f53, sans-serif;
+    line-height: 1.5;
+    font-smoothing: antialiased;
+}
+div, dl, dt, dd, ul, ol, li, h1, h2, h3, h4, h5, h6, pre, code, form, fieldset, legend, input, textarea, p, blockquote, th, td, em, button {
+    margin: 0;
+    padding: 0;
+}
+img, fieldset {
+    margin: 0;
+    padding: 0;
+    border: 0;
+}
+a {
+    text-decoration: none;
+}
+ul, li {
+    list-style: none;
+}
+
+.clearfix {
+    *zoom: 1;
+    &::after {
+        display: block;
+        clear: both;
+        overflow: hidden;
+        height: 0;
+        content: ".";
+    }
+}
+
+@media screen and (max-width: 1250px) {
+    .hide_on_small {
+        display: none;
+    }
+}

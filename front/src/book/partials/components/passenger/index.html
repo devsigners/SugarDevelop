@@ -1,0 +1,17 @@
+<!-- __component_key__={{__c_passenger__._key}} -->
+<div class="basic-card">
+    <div class="passenger-info">
+        <div class="form">
+            {{> (relative __c_passenger__._stateFile) }}
+        </div>
+    </div>
+    <div class="extra-box">
+        <div class="extra-info">
+            <div class="ico-slogan">
+                <h4>订票无忧</h4>
+                <p>价格保障，确保成行</p>
+            </div>
+        </div>
+    </div>
+    <div class="passenger-num"><i class="ico-num-{{__c_passenger__.pageNumber}}">{{__c_passenger__.pageNumber}}</i></div>
+</div>

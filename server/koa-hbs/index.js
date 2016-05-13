@@ -1,27 +1,13 @@
 'use strict';
 
 const path = require('path');
+const debug = require('debug')('khbs');
 const Hbs = require('./hbs');
 const util = require('./util');
 
-
-const parseUrl = (url, isProjectGroup) => {
-    // it's tricky that the url could be 'dir/name' (default, ctx.path is always '/')
-    // or 'dir\\name' because use `path.join` on windows
-    let parts = path.normalize(url).split(path.sep);
-    let projectName; // group/projectName
-    if (isProjectGroup(parts[0], url)) {
-        projectName = parts.slice(0, 2).join(path.sep);
-    }
-    return {
-        isGroup: !!projectName,
-        projectName: projectName || parts[0],
-        viewName: parts.slice(projectName ? 2 : 1).join(path.sep)
-    };
-};
-
 const loadConfig = (projectName, options, cache) => {
     const url = path.join(options.root, projectName, options.configFileName);
+    debug('load config, url is %s', path.join(projectName, options.configFileName));
     if (!options.disableCache && cache[url]) {
         return Promise.resolve(cache[url].result || cache[url]);
     }
@@ -45,13 +31,14 @@ const createRenderer = (hbs) => {
     const options = hbs.options;
     // this must be bind to koa instance
     return function(url, locals) {
+        debug('render url is %s, data is %o', url, locals);
         locals = locals || {};
         util.merge(locals, this.state, hbs.locals);
         const extname = path.extname(url);
         // remove first char ('/' or '\')
         let name = (extname ? url.slice(0, - extname.length) :
             path.join(url, placeholderIndex)).slice(1);
-        const urlInfo = parseUrl(name, options.isProjectGroup);
+        const urlInfo = util.parseUrl(name, options.isProjectGroup);
         if (urlInfo.projectName === placeholderIndex) {
             urlInfo.projectName = '';
             urlInfo.viewName = placeholderIndex;
@@ -68,12 +55,26 @@ const createRenderer = (hbs) => {
         });
     };
 };
+// used to render partial
+const createComponenRenderer = (hbs) => {
+    return function(url, locals) {
+        locals = locals || {};
+        url = url.slice(1);
+        util.merge(locals, this.state, hbs.locals);
+        return hbs.renderComponent(url, locals).then((component) => {
+            this.body = component;
+        });
+    }
+};
 
 exports = module.exports = (options) => {
+    debug('start, attach render and renderComponent method, options is %o', options);
     const hbs = new Hbs(options);
     const render = createRenderer(hbs);
+    const renderComponent = createComponenRenderer(hbs);
     return (ctx, next) => {
         ctx.render = render;
+        ctx.renderComponent = renderComponent;
         return next();
     };
 };
@@ -81,4 +82,4 @@ exports = module.exports = (options) => {
 exports.Hbs = Hbs;
 exports.createRenderer = createRenderer;
 exports.loadConfig = loadConfig;
-exports.parseUrl = parseUrl;
+exports.parseUrl = util.parseUrl;

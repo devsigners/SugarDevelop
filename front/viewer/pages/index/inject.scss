@@ -1,0 +1,82 @@
+.inject-shadow
+{
+    box-shadow: 0 0 0 1px #88ceff;
+}
+.inject-box
+{
+    position: absolute;
+    z-index: 9999;
+
+    width: 24px;
+
+    pointer-events: none;
+    .inject-box-head
+    {
+        font-size: 14px;
+        font-weight: 300;
+        line-height: 34px;
+
+        position: absolute;
+        top: -6px;
+        right: 5px;
+
+        height: 29px;
+        padding: 0 12px 3px;
+
+        cursor: pointer;
+        white-space: nowrap;
+        pointer-events: auto;
+
+        color: #fff;
+        border: 1px solid;
+        border-color: #1f2223 #2d3032;
+        border-radius: 4px 4px 0 0;
+        background: rgba(47, 51, 54, .7);
+        box-shadow: 0 1px 5px rgba(0,0,0,.3);
+        text-shadow: rgba(0,0,0,.3) 0 1px 1px !important;
+        .component-name
+        {
+            color: #fa2;
+        }
+    }
+    .inject-box-body
+    {
+        font-size: 14px;
+        font-weight: 300;
+        line-height: 34px;
+
+        position: absolute;
+        top: 28px;
+        right: 0;
+
+        display: none;
+
+        min-width: 160px;
+        padding: 5px 12px 8px;
+
+        white-space: nowrap;
+        pointer-events: auto;
+
+        color: #fff;
+        border-radius: 4px;
+        background: rgba(47, 51, 54, .7);
+        box-shadow: 0 1px 5px rgba(0,0,0,.3);
+        text-shadow: rgba(0,0,0,.3) 0 1px 1px !important;
+    }
+    label
+    {
+        position: relative;
+        font-size: 14px;
+        line-height: 100%;
+
+        display: block;
+
+        padding: 4px 0;
+
+        color: #fff;
+    }
+    input
+    {
+        margin-right: 4px;
+    }
+}
