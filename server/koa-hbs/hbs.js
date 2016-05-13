@@ -280,7 +280,8 @@ class Hbs {
         let hookData = {
             [`__c_${componentName}__`]: {
                 _state: stateName,
-                _stateFile: map.states[stateName].file
+                _stateFile: map.states[stateName].file,
+                _key: map._key // copy map._key
             }
         };
         // patch hookData and map to this.data here
