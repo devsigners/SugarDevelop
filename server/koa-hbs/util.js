@@ -27,7 +27,7 @@ const readSync = fs.readFileSync;
  */
 const exist = (filename) => {
     return new Promise((resolve, reject) => {
-        access(filename, err => err ? reject(err) : resolve());
+        fs.access(filename, err => err ? reject(err) : resolve(filename));
     });
 };
 
@@ -51,7 +51,7 @@ const merge = function(target, source) {
             [merge(target, source)].concat([].slice.call(arguments, 2)));
     }
     for (let prop in source) {
-        if (isPlainObject(source[prop]) && isPlainObject(target[source])) {
+        if (isObject(source[prop]) && isObject(target[prop])) {
             merge(target[prop], source[prop]);
         } else {
             target[prop] = source[prop];
@@ -61,20 +61,25 @@ const merge = function(target, source) {
 };
 
 // only merge property that target has
-const mergeFileds = function(target, source) {
+const mergeFields = function(target, source) {
     if (arguments.length > 2) {
         return merge.apply(undefined,
             [merge(target, source)].concat([].slice.call(arguments, 2)));
     }
     for (let prop in source) {
         if (!(prop in target)) continue;
-        if (isPlainObject(source[prop]) && isPlainObject(target[source])) {
+        if (isObject(source[prop]) && isObject(target[prop])) {
             merge(target[prop], source[prop]);
         } else {
             target[prop] = source[prop];
         }
     }
     return target;
+};
+
+// not include function, Date, RegExp and so on
+const isObject = (obj) => {
+    return Object.prototype.toString.call(obj) === '[object Object]';
 };
 
 const isPlainObject = (obj) => {
@@ -110,9 +115,43 @@ const parseString = (str) => {
 
 const genUniqueKey = () => Date.now().toString() + Math.random().toString().slice(-4);
 
+/**
+ * access object property via deep propertyName
+ * @param  {Object} obj          source object
+ * @param  {String} propertyName property name, could be like 'user.name'
+ * @return {Any}                 the value
+ */
+const accessDeepProperty = (obj, propertyName) => {
+    let names = propertyName.split('.');
+    names.some((p, i) => {
+        obj = obj[p];
+        if (!(obj instanceof Object)) {
+            i < names.length - 1 && (obj = undefined);
+            return true;
+        }
+    });
+    return obj;
+};
+
+const parseUrl = (url, isProjectGroup) => {
+    // it's tricky that the url could be 'dir/name' (default, ctx.path is always '/')
+    // or 'dir\\name' because use `path.join` on windows
+    let parts = path.normalize(url).split(path.sep);
+    // projectName is like: group/project or project
+    let projectName;
+    if (isProjectGroup(parts[0], url)) {
+        projectName = parts.slice(0, 2).join(path.sep);
+    }
+    return {
+        isGroup: !!projectName,
+        projectName: projectName || parts[0],
+        viewName: parts.slice(projectName ? 2 : 1).join(path.sep)
+    };
+};
+
 module.exports = {
     merge,
-    mergeFileds,
+    mergeFields,
     isPlainObject,
     read,
     readSync,
@@ -121,5 +160,7 @@ module.exports = {
     parseMixedYaml,
     parseString,
     sharedPathRe: /^shared:/i,
-    genUniqueKey
+    genUniqueKey,
+    accessDeepProperty,
+    parseUrl
 };
