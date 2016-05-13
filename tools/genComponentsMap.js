@@ -56,8 +56,19 @@ util.list(config.staticRoot, ['**/component.json']).then((files) => {
         }
         // check c._state (which state is rendered and shown, defaults to `default`)
         if (!c._state) {
+            // attention: here we just set `_state` to 'default',
+            // if we write `{{> components/name/state}}` in our html,
+            // we need set `_state = state` in component.json manually
             c._state = 'default';
-            needToWriteBack =  true;
+            needToWriteBack = true;
+        }
+        if (!c._stateFile) {
+            c._stateFile = c.states[c._state].file;
+            needToWriteBack = true;
+        }
+        if (!c._id) {
+            c._id = info.file;
+            needToWriteBack = true;
         }
         needToWriteBack && writePromise.push(util.write(path.resolve(config.staticRoot, res.files[i]),
             JSON.stringify(c, null, '\t')));
@@ -74,7 +85,7 @@ util.list(config.staticRoot, ['**/component.json']).then((files) => {
                 }
             };
         } else {
-            res[projectName].files.push(res.files[i]);
+            res[projectName].__files__.push(res.files[i]);
             res[projectName].keyComponentMap[c._key] = info.file;
             res[projectName].components[info.file] = c;
         }
@@ -89,5 +100,5 @@ util.list(config.staticRoot, ['**/component.json']).then((files) => {
 }).then(() => {
     debug('Done!');
 }).catch((err) => {
-    console.error(err);
+    console.log(err.stack);
 });
