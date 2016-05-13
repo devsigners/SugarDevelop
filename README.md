@@ -22,7 +22,7 @@ Hope the develop environment will make static page development much easier.
 
 ### Workflow
 
-The simplest way to run is exec `npm install && npm start`, then view `http://0.0.0.0:3000` for your static pages.
+The simplest way to run is exec `npm install && npm run build && npm start`, then view `http://0.0.0.0:3000` for your static pages.
 
 Develop dir is `front/src`:
 
