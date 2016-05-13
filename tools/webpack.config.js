@@ -9,7 +9,7 @@ const config = require('../config');
 
 const APP_PATH = config.viewer.source;
 const BUILD_PATH = config.viewer.dest;
-console.log(APP_PATH, BUILD_PATH);
+
 const plugins = [
     new webpack.DefinePlugin({
         'process.env':{

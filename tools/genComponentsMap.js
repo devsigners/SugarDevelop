@@ -1,7 +1,7 @@
 'use strict';
 
 const path = require('path');
-const debug = require('debug')('tool:cmap');
+const debug = require('debug')('tool:componentmap');
 const util = require('./util');
 const config = require('../config');
 
