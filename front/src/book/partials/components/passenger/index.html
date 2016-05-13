@@ -1,8 +1,8 @@
-<!-- __component_key__={{__component_data__._key}} -->
+<!-- __component_key__={{__c_passenger__._key}} -->
 <div class="basic-card">
     <div class="passenger-info">
         <div class="form">
-            {{> (relative __component__) }}
+            {{> (relative __c_passenger__._stateFile) }}
         </div>
     </div>
     <div class="extra-box">
@@ -13,5 +13,5 @@
             </div>
         </div>
     </div>
-    <div class="passenger-num"><i class="ico-num-{{__component_data__.index}}">{{__component_data__.index}}</i></div>
+    <div class="passenger-num"><i class="ico-num-{{__c_passenger__.pageNumber}}">{{__c_passenger__.pageNumber}}</i></div>
 </div>
