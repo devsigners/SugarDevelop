@@ -92,7 +92,7 @@ const initComponentStateElement = (state, component) => {
     });
 };
 
-const showState = (input, component, projectName) => {
+const showState = (input, component, projectName, componentName) => {
     let stateName = $(input).data('state');
     if (!stateName) {
         // show all
@@ -105,12 +105,7 @@ const showState = (input, component, projectName) => {
         setToolboxPosToActiveStateEl(component);
     } else {
         $.ajax({
-            url: `/components/${stateName}`,
-            data: {
-                project: projectName,
-                configFile: component.configFile,
-                state: stateName
-            },
+            url: `/components/${projectName}/${componentName}/${stateName}`,
             type: 'GET'
         }).then((partial) => {
             state.fileLoaded = true;
@@ -198,9 +193,8 @@ const setupComponentsViewer = (iframe, injectedStyle, hooks, location) => {
 
     // merge components status from share url
     let shareMap = parseUrlQuery(location);
-    console.log('.......', shareMap);
 
-    console.log(__components__);
+    console.log(shareMap, __components__);
     for (let name in components) {
         let component = components[name];
         let {
@@ -212,7 +206,7 @@ const setupComponentsViewer = (iframe, injectedStyle, hooks, location) => {
         });
         $box.on('change', 'input', (ev) => {
             if (ev.target.checked) {
-                showState(ev.target, component, __components__.project);
+                showState(ev.target, component, __components__.project, name);
             } else {
                 hideState(ev.target, component, hooks && hooks.onHideAll);
             }
