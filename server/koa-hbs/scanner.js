@@ -6,7 +6,10 @@ const sharedPathRe = require('./util').sharedPathRe;
 const processHelper = (block, ret, alwaysHelper) => {
     if (alwaysHelper || Handlebars.AST.helpers.helperExpression(block)) {
         let name = block.path.original;
-        ret.push({ name });
+        ret.push({
+            name,
+            node: block
+        });
         if (sharedPathRe.test(name)) {
             block.path.original = block.path.original.replace(sharedPathRe, '');
             block.path.parts[0] = block.path.parts[0].replace(sharedPathRe, '');
@@ -50,7 +53,8 @@ class Scanner extends Handlebars.Visitor {
         this.partials.push({
             dynamic,
             name: partial.name.original,
-            hash: partial.hash && partial.hash.pairs
+            hash: partial.hash && partial.hash.pairs,
+            node: partial
         });
         super.PartialStatement(partial);
     }

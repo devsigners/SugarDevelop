@@ -4,6 +4,7 @@ const path = require('path');
 const Handlebars = require('handlebars');
 const debug = require('debug')('khbs');
 
+const initCoreHelpers = require('./helpers');
 const setting = require('./setting');
 const Scanner = require('./scanner.js');
 const util = require('./util');
@@ -29,6 +30,7 @@ class Hbs {
             }
         };
         this.dynamicPartials = [];
+        initCoreHelpers(this);
         // preinstall preInstalledHelpers
         options.preInstalledHelper && this.installHelper(options.preInstalledHelper);
     }
@@ -158,6 +160,7 @@ class Hbs {
             });
     }
     installHelper(name, baseUrl) {
+        debug('installHelper, name is %s, baseUrl is %s', name, baseUrl);
         try {
             const helpers = require(this.resolvePath(name, 'helper', '.js', baseUrl));
             return this.registerHelper(helpers);
@@ -199,6 +202,7 @@ class Hbs {
         let layoutFn;
         // reset this.data, data must be object
         this.data = data;
+        if (!data.__css__) data.__css__ = [];
         return this.resolve(url, (rawTpl) => {
             let parsed = util.parseMixedYaml(rawTpl);
             let metadata = parsed.metadata;

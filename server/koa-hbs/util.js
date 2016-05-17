@@ -19,6 +19,7 @@ const read = (filename, options) => {
 };
 
 const readSync = fs.readFileSync;
+const writeSync = fs.writeFileSync;
 
 /**
  * exist path or not
@@ -155,6 +156,7 @@ module.exports = {
     isPlainObject,
     read,
     readSync,
+    writeSync,
     exist,
     parseYaml,
     parseMixedYaml,

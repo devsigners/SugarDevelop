@@ -15,7 +15,8 @@ app.use(logger());
 app.use(hbs(config.hbs));
 
 app.use(serve(config.staticRoot, {
-    defer: true
+    defer: true,
+    hidden: true
 }));
 
 const serveViewer = serve(config.viewer.dest);
