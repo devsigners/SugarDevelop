@@ -65,6 +65,7 @@ util.list(config.root, [
     return util.list(config.root, [
         '**/*.js', // js
         '**/*.css', // css
+        '**/.*.css',
         '**/*.{png,jpg,gif,webp}', // img
         '**/*.{svg,eot,ttf,otf,woff}', // font
         '**/*.{mp3,mp4,ogg,wav,aac,webm}', // media
