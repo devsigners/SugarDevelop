@@ -19,7 +19,7 @@ const generateMapFile = (map) => {
 })(this, ${content})`;
 };
 
-util.list(config.staticRoot, ['**/component.json']).then((files) => {
+util.list(config.staticRoot, ['**/component.json', '!**/node_modules/**/*.*']).then((files) => {
     debug('files catched %o', files);
     if (!files || !files.length) {
         process.exit(0);
