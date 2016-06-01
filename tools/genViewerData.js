@@ -7,7 +7,7 @@ const config = require('../config');
 
 let cfgFiles;
 
-util.list(config.staticRoot, ['**/.config.yml']).then((files) => {
+util.list(config.staticRoot, ['**/.config.yml', '!**/node_modules/**/.config.yml']).then((files) => {
     debug('files catched %o', files);
     if (!files || !files.length) {
         process.exit(0);
@@ -24,7 +24,8 @@ util.list(config.staticRoot, ['**/.config.yml']).then((files) => {
             result.push(cfg.project);
         }
     });
-    return util.write(path.resolve(config.staticRoot, 'viewerData.js'),
+    // save to viewer source dir
+    return util.write(path.resolve(config.viewer.source, '._pageData.js'),
         `module.exports = ${JSON.stringify(result, null, '\t')};`);
 }).then(() => {
     debug('Done!');

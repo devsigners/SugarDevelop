@@ -2,14 +2,14 @@ import React from 'react';
 import ReactDOM from 'react-dom';
 import ReactDOMServer from 'react-dom/server';
 import AppRoutes from './routes.js';
-import viewerData from '../src/viewerData';
+import pageData from './._pageData.js';
 import './styles/app.scss';
 
 class App {
     render(element) {
         var appRootElement = React.createElement(AppRoutes, {
             state: {
-                pages: viewerData.map(d => {
+                pages: pageData.map(d => {
                     d.url = '/viewer/' + d.name;
                     return d;
                 }),
