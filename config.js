@@ -35,7 +35,8 @@ module.exports = {
     // build static config items
     buildStatic: {
         // include/exclude html pages with file pattern, like `!myTmpProj/**.html`
-        htmlPattern: []
+        htmlPattern: [],
+        dest: path.join(root, 'front/dest')
     },
     viewer: {
         source: path.join(root, 'front/viewer'),
