@@ -2,6 +2,7 @@
 
 const path = require('path');
 const KoaHbs = require('../server/koa-hbs');
+const buildStaticConfig = require('../config').buildStatic;
 let config = require('../config').hbs;
 const util = require('./util');
 
@@ -16,8 +17,9 @@ const hbsInstance = new Hbs(config);
 hbsInstance._genPartialComment = () => null;
 util.list(config.root, [
     '**/*' + config.extname,
-    '!' + config.shared + '/**/*' + config.extname
-]).then(files => {
+    '!' + config.shared + '/**/*' + config.extname,
+    '!**/node_modules/**/*' + config.extname
+].concat(buildStaticConfig.htmlPattern || [])).then(files => {
     let localConfigPromises = files.map(file => {
         let info = parseUrl(file, config.isProjectGroup);
         return loadConfig(info.projectName, config, hbsInstance.cache).then(localConfig => {

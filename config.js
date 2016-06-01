@@ -32,7 +32,11 @@ const hbsOptions = {
 module.exports = {
     hbs: hbsOptions,
     staticRoot,
-    // viewerRoot: path.join(root, 'front/viewer-dest'),
+    // build static config items
+    buildStatic: {
+        // include/exclude html pages with file pattern, like `!myTmpProj/**.html`
+        htmlPattern: []
+    },
     viewer: {
         source: path.join(root, 'front/viewer'),
         dest: path.join(root, 'front/vdest'),
