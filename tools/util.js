@@ -20,14 +20,14 @@ const list = (root, pattern) => {
     });
 };
 
-const write = (filename, content, createDirIfNotExists) => {
+const write = (filename, content, createDirIfNotExists, options) => {
     return new Promise((resolve, reject) => {
         let dir = createDirIfNotExists && filename && path.parse(filename).dir;
         let promise = createDirIfNotExists ? util.exist(dir).catch(() => {
             return mkdir(dir);
         }) : Promise.resolve(null);
         promise.then(() => {
-            fs.writeFile(filename, content, {
+            fs.writeFile(filename, content, options || {
                 encoding: 'utf8'
             }, (err) => err ? reject(err) : resolve());
         });

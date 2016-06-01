@@ -72,8 +72,9 @@ util.list(config.root, [
     ].concat(exclude)).then((files => {
         debug('files catched %o', files);
         let promises = files.map(file => {
-            return util.read(path.resolve(config.root, file)).then(data => {
-                return util.write(path.join(buildStaticConfig.dest, file), data, true);
+            return util.read(path.resolve(config.root, file), {}).then(data => {
+                debug('%s length: %d', file, data.length);
+                return util.write(path.join(buildStaticConfig.dest, file), data, true, {});
             });
         });
         return Promise.all(promises);
