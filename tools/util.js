@@ -34,10 +34,34 @@ const write = (filename, content, createDirIfNotExists, options) => {
     });
 };
 
+const readlinkSync = (url) => {
+    const parts = url.split(path.sep);
+    let realUrl = '';
+    let part;
+    let isAbsolute = parts[0] === '';
+    while ((part = parts.shift()) != null) {
+        if (part === '') {
+            realUrl += '/';
+        } else {
+            realUrl = path.join(realUrl, part);
+            let stat = fs.lstatSync(realUrl);
+            if (stat.isSymbolicLink()) {
+                // '/tmp' --> 'private/tmp', loss absolute
+                realUrl = fs.readlinkSync(realUrl);
+            }
+            if (isAbsolute) {
+                realUrl = path.join('/', realUrl)
+            }
+        }
+    }
+    return realUrl;
+};
+
 exports = module.exports = {
     mkdir,
     list,
-    write
+    write,
+    readlinkSync
 };
 
 util.merge(exports, util);

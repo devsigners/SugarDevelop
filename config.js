@@ -31,6 +31,7 @@ const hbsOptions = {
 
 module.exports = {
     hbs: hbsOptions,
+    modulesRoot: path.join(root, 'node_modules'),
     staticRoot,
     // build static config items
     buildStatic: {

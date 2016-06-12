@@ -6,9 +6,14 @@ const webpack = require('webpack');
 const HtmlwebpackPlugin = require('html-webpack-plugin');
 const ExtractTextPlugin = require('extract-text-webpack-plugin');
 const config = require('../config');
-
-const APP_PATH = config.viewer.source;
+const util = require('./util');
+let APP_PATH = config.viewer.source;
 const BUILD_PATH = config.viewer.dest;
+
+// APP_PATH may be symbol link, fix it
+try {
+    APP_PATH = util.readlinkSync(APP_PATH);
+} catch (e) {}
 
 const plugins = [
     new webpack.DefinePlugin({
@@ -20,7 +25,8 @@ const plugins = [
         minimize: true,
         compress:{
             warnings: false
-        }
+        },
+        sourceMap: false // prevent possible source map error
     }),
     new webpack.optimize.CommonsChunkPlugin('vendors', `scripts/vendors.js`),
     new HtmlwebpackPlugin({
@@ -65,7 +71,12 @@ const loaders = [
         include: [APP_PATH],
         exclude: /(node_modules|bower_components)/,
         query: {
-            presets: ['es2015', 'stage-0', 'react']
+            // presets: ['es2015', 'stage-0', 'react']
+            presets: [
+                require.resolve('babel-preset-es2015'),
+                require.resolve('babel-preset-react'),
+                require.resolve('babel-preset-stage-0'),
+            ]
         }
     }, {
         test: /\.woff$/,
@@ -102,6 +113,12 @@ const webpackConfig = {
         chunkFilename: `scripts/[id].bundle.js`
     },
     devtool: false,
+    resolve: {
+        fallback: [config.modulesRoot]
+    },
+    resolveLoader: {
+        root: config.modulesRoot
+    },
     plugins,
     target: 'web',
     module: {
@@ -109,10 +126,7 @@ const webpackConfig = {
     },
     postcss: [autoprefixer({
         browsers: ['last 2 versions']
-    })],
-    stats: {
-        colors: true
-    }
+    })]
 };
 
 module.exports = webpackConfig;

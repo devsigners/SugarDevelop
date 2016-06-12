@@ -26,7 +26,7 @@ util.list(config.staticRoot, ['**/.config.yml', '!**/node_modules/**/.config.yml
     });
     // save to viewer source dir
     return util.write(path.resolve(config.viewer.source, '._pageData.js'),
-        `module.exports = ${JSON.stringify(result, null, '\t')};`);
+        `module.exports = ${JSON.stringify(result, null, '\t')};`, true);
 }).then(() => {
     debug('Done!');
 }).catch((err) => {
