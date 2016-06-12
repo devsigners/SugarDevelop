@@ -5,7 +5,7 @@ const util = require('./util');
 
 const infoOptions = {
     path: 'relativeToRoot', // 'absolute'|'relative'|'relativeToRoot'|false
-    status: 'show', // 'show'|'hide'
+    status: 'hide', // 'show'|'hide'
     invoke: true // true|false
 };
 
