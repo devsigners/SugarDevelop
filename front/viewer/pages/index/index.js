@@ -81,12 +81,21 @@ class IndexPage extends Component {
         return (
             <div>
                 <header className={styles.header}>
-                    <nav className={styles.nav}>
-                        <ul className={styles.menuContainer}>
-                            {
-                                this.state.pages.map((v, i) => <li className={styles.menuItem} key={i}><span onClick={this._loadPage.bind(this, v.url)}>{v.label}</span></li>)
-                            }
+                    <nav className={[styles.nav, styles.popoverParent].join(' ')}>
+                        <ul className={[styles.menuContainer, styles.popoverHeader].join(' ')}>
+                            <li className={styles.menuItem}>项目</li>
                         </ul>
+                        <div className={styles.popover}>
+                            {
+                                this.state.pages.length ? this.state.pages.map((v, i) => {
+                                    return (
+                                        <div key={i} onClick={this._loadPage.bind(this, v.url)}>
+                                            <span>{v.label}</span>
+                                        </div>
+                                    )
+                                }) : null
+                            }
+                        </div>
                     </nav>
                     <nav className={styles.nav}>
                         <ul className={styles.menuContainer}>
